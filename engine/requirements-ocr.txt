@@ -1,0 +1,3 @@
+# Separate because it's heavy (~1 GB with paddlepaddle). Installed in the Docker image.
+paddlepaddle>=3.0
+paddleocr>=3.0

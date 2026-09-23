@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+.pytest_cache/
+node_modules/
+.next/
+engine/samples/*
+!engine/samples/README.md
+!engine/samples/expected.example.json

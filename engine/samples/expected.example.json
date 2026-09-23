@@ -1,0 +1,11 @@
+{
+  "factura_digital.pdf": {
+    "ruc_emisor": "0991234578001",
+    "razon_social": "COMERCIAL ANDINA S.A.",
+    "numero_factura": "001-002-000004567",
+    "fecha_emision": "2025-03-15",
+    "subtotal": "100.00",
+    "iva": "15.00",
+    "total": "115.00"
+  }
+}
