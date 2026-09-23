@@ -63,6 +63,51 @@ motor pide además descuento, servicio e ICE como campos ocultos (`aux_*`) para 
 suma cuadre en restaurantes. En vez de `form` se puede mandar `form_id=sorteo`
 (`GET /forms` lista los predefinidos). `previews=true` incluye las imágenes de página.
 
+### Respuesta
+
+```jsonc
+{
+  "form": {"id": "custom", "title": "Consumo"},
+  "document": {"type": "image", "pages": 1, "dimensions": [{"width": 1200, "height": 1600}]},
+  // Todas las líneas leídas, con su caja relativa (0-1) para dibujarla sobre la imagen.
+  "lines": [{"id": "L41", "text": "35,60", "bbox": [0.62, 0.55, 0.70, 0.57], "page": 0, "row": 29, "confidence": 0.97}],
+  // Un elemento por campo visible, en el orden del formulario.
+  "fields": [{
+    "key": "a_pagar", "label": "Total", "value": "35.60",
+    "status": "green",                 // green | yellow | empty
+    "probability": 0.99,               // confianza de Jev en la línea elegida
+    "raw_line_id": "L41",              // línea que eligió Jev
+    "value_line_id": "L41",            // línea de donde salió el valor (puede ser la vecina)
+    "validation_notes": ["Subtotal + IVA + otros = total (35.60)"],
+    "source": "matcher"                // matcher | clave_acceso
+  }],
+  "checks": {
+    "clave_acceso": null,              // {value, valid, line_id, ambiente} si hay una
+    "totals": {"ok": true, "note": "..."},   // ok: true | false | null (faltan datos)
+    "hidden_fields": [ /* campos ocultos y aux_*, mismo formato que fields */ ]
+  },
+  "matcher": "jev",
+  "timings": {"read_ms": 1030, "match_ms": 1754, "validate_ms": 1, "total_ms": 2785}
+}
+```
+
+Errores: `400` formulario inválido (el `detail` dice por qué), `404` `form_id`
+desconocido, `413` archivo muy grande, `415` formato no soportado, `502` falló Jev.
+
+## Variables de entorno
+
+| Variable | Por defecto | Qué hace |
+|----------|-------------|----------|
+| `OPENROUTER_API_KEY` | (obligatoria con Jev) | Clave de OpenRouter |
+| `MATCHER` | `jev` | `jev` o `heuristic` (sin API, para comparar) |
+| `JEV_MODEL` | `typesafe/jev-1.13` | Modelo en OpenRouter |
+| `JEV_TIMEOUT_S` | `20` | Timeout de la llamada a Jev |
+| `GREEN_THRESHOLD` | `0.85` | Probabilidad mínima para verde |
+| `OCR_ENGINE` | `rapid` | `rapid` (RapidOCR) o `paddle` (PaddleOCR) |
+| `OCR_WARMUP` | `1` | Cargar el OCR al arrancar la API |
+| `MAX_UPLOAD_MB` | `15` | Tamaño máximo del archivo |
+| `OCR_LANG`, `OCR_DET_MODEL`, `OCR_REC_MODEL`, `OCR_UNWARP` | | Solo con `OCR_ENGINE=paddle` |
+
 ## Reglas del semáforo
 
 - **Verde**: probabilidad ≥ `GREEN_THRESHOLD` (0.85) y validación OK; o confirmado de
@@ -71,12 +116,15 @@ suma cuadre en restaurantes. En vez de `form` se puede mandar `form_id=sorteo`
 - **Vacío**: el matcher respondió `NONE` (y la clave de acceso no lo pudo completar).
 
 La suma acepta descuento, ICE y servicio/propina (10% en restaurantes), leídos como
-campos ocultos del formulario.
+campos ocultos (`aux_*` si el formulario no los trae).
 
-## Pendiente de verificar
+## Limitaciones conocidas
 
 - La API de decisiones de Jev (`/api/alpha/decisions`) es alpha y sin documentación
   pública: el formato se dedujo de sus mensajes de error.
 - OCR: RapidOCR tarda 1–3 s por foto en CPU (M3). PaddleOCR es ~10x más lento en
   Apple Silicon; sigue disponible con `OCR_ENGINE=paddle` (corrige fotos de lado).
 - Una foto con dos documentos (factura + recibo) mezcla valores de ambos.
+- Los campos `text` pueden conservar la etiqueta impresa (por ejemplo "MESA:mesa 15").
+- Si hay dos subtotales por tarifa distintos de cero (15% y 0%), la suma puede no
+  cuadrar y los montos quedan en amarillo.
