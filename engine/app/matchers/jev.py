@@ -18,7 +18,7 @@ from ..forms import FieldDef
 from ..models import Line
 from .base import NONE, Match
 
-OPENROUTER_URL = os.getenv("OPENROUTER_URL", "https://openrouter.ai/api/v1/chat/completions")
+OPENROUTER_URL = os.getenv("OPENROUTER_URL", "https://openrouter.ai/api/alpha/decisions")
 TIMEOUT_S = float(os.getenv("JEV_TIMEOUT_S", "20"))
 
 
@@ -27,12 +27,15 @@ class JevError(RuntimeError):
 
 
 def build_payload(model: str, state: str, lines: list[Line], fields: list[FieldDef]) -> dict:
-    options = [ln.id for ln in lines] + [NONE]
+    """OpenRouter /api/alpha/decisions: each question is
+    `{"type": "choice", "instructions": str, "criteria": {option: description}}`."""
+    criteria = {ln.id: ln.text for ln in lines}
+    criteria[NONE] = "El dato no aparece en el documento."
     questions = {
         f.key: {
             "type": "choice",
-            "question": f.question + " Responde con el ID de la línea, o NONE si no aparece.",
-            "options": options,
+            "instructions": f.question + " Responde con el ID de la línea, o NONE si no aparece.",
+            "criteria": criteria,
         }
         for f in fields
     }

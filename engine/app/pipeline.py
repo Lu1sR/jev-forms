@@ -6,7 +6,7 @@ import os
 import time
 
 from .extract import extract_near
-from .forms import load_form
+from .forms import FormDef, load_form
 from .layout import build_lines, render_state
 from .matchers import Matcher, get_matcher
 from .models import FieldResult, Line
@@ -21,8 +21,10 @@ _SOFT_NOTES = (
     "Subtotal + IVA", "Confirmado por",  # "No cuadra: ..." stays hard
 )
 
-_CLAVE_FIELDS = {"ruc_emisor": "ruc", "numero_factura": "numero_factura", "fecha_emision": "fecha"}
-_MONEY_KEYS = ("subtotal", "iva", "total")
+# Cross-checks work on field roles (see forms.ROLES), not on keys, so any form
+# that marks its fields with these roles gets them.
+_CLAVE_ROLES = {"ruc_emisor": "ruc", "numero_factura": "numero_factura", "fecha_emision": "fecha"}
+_MONEY_ROLES = ("subtotal", "iva", "total")
 
 
 def _ms(t: float) -> int:
@@ -40,12 +42,13 @@ def _status(f: FieldResult, threshold: float) -> str:
 
 def process(
     data: bytes,
-    form_id: str = "sorteo",
+    form: FormDef | str = "sorteo",
     matcher: Matcher | None = None,
     threshold: float = GREEN_THRESHOLD,
     include_previews: bool = True,
 ) -> dict:
-    form = load_form(form_id)
+    if isinstance(form, str):
+        form = load_form(form)
     matcher = matcher or get_matcher()
     t_all = time.perf_counter()
 
@@ -76,10 +79,11 @@ def process(
         results[fd.key] = fr
 
     # Access key: deterministic cross-check (and fallback) for RUC, number, date.
+    by_role = {f.role: results[f.key] for f in form.fields if f.role}
     clave = find_clave(lines)
     if clave and clave.check_ok and clave.tipo_comprobante == "01":
-        for key, attr in _CLAVE_FIELDS.items():
-            fr = results.get(key)
+        for role, attr in _CLAVE_ROLES.items():
+            fr = by_role.get(role)
             if fr is None:
                 continue
             expected = getattr(clave, attr)
@@ -100,17 +104,17 @@ def process(
         ) and any(n.startswith("Coincide con la clave") for n in fr.validation_notes):
             fr.status = "green"
 
-    totals_ok, totals_note = check_totals(results)
+    totals_ok, totals_note = check_totals(by_role)
     if totals_ok is False:
-        for k in _MONEY_KEYS:
-            results[k].status = "yellow"
-            results[k].validation_notes.append(totals_note)
+        for r in _MONEY_ROLES:
+            by_role[r].status = "yellow"
+            by_role[r].validation_notes.append(totals_note)
     elif totals_ok:
-        results["total"].validation_notes.append(totals_note)
+        by_role["total"].validation_notes.append(totals_note)
         # Three independently read numbers add up: strong evidence, same as the
         # access key for the other fields.
-        for k in _MONEY_KEYS:
-            fr = results[k]
+        for r in _MONEY_ROLES:
+            fr = by_role[r]
             if fr.status == "yellow" and all(n.startswith(_SOFT_NOTES) for n in fr.validation_notes):
                 fr.status = "green"
                 fr.validation_notes.append("Confirmado por la suma de totales")

@@ -18,6 +18,9 @@ class Box:
     bbox: tuple[float, float, float, float]
     page: int
     confidence: float = 1.0
+    # OCR quadrilateral (4 relative (x, y) points, clockwise from top-left).
+    # Lets the layout measure text tilt; None for PDF text (always upright).
+    poly: tuple[tuple[float, float], ...] | None = None
 
 
 @dataclass

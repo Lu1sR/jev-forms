@@ -1,3 +1,5 @@
-# Separate because it's heavy (~1 GB with paddlepaddle). Installed in the Docker image.
-paddlepaddle>=3.0
-paddleocr>=3.0
+# Default engine (OCR_ENGINE=rapid): PaddleOCR models on ONNX Runtime, light and fast on CPU.
+rapidocr>=3.4
+onnxruntime>=1.18
+# Optional (OCR_ENGINE=paddle): heavy (~1 GB), adds document-orientation correction.
+# pip install "paddlepaddle>=3.0" "paddleocr>=3.0"

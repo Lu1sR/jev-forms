@@ -70,6 +70,59 @@ def test_row_grouping_keeps_columns_apart():
     assert "[L1] SUBTOTAL SIN IMPUESTOS    [L2] 100.00" in render_state(lines)
 
 
+def _tilted(text, x0, y0, x1, y1, deg, page):
+    """OCR-style box: the upright rectangle rotated `deg` around the page centre."""
+    import math
+    a = math.radians(deg)
+    cx, cy = page.width / 2, page.height / 2
+    pts = []
+    for x, y in ((x0, y0), (x1, y0), (x1, y1), (x0, y1)):
+        X, Y = x * page.width - cx, y * page.height - cy
+        pts.append(((cx + X * math.cos(a) - Y * math.sin(a)) / page.width,
+                    (cy + X * math.sin(a) + Y * math.cos(a)) / page.height))
+    xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+    return Box(text, (min(xs), min(ys), max(xs), max(ys)), 0, poly=tuple(pts))
+
+
+def test_tilted_photo_keeps_label_with_its_value():
+    # Receipt photo tilted -6°: each value ends up level with the NEXT label down
+    # unless the layout straightens the boxes first.
+    page = PageInfo(width=1000, height=1400)
+    rows = [("SubTotal Usd", "28,48"), ("Serv. 10%", "2,85"), ("IVA", "4,27"), ("TOTAL", "35,60")]
+    boxes = []
+    for i, (label, value) in enumerate(rows):
+        y = 0.50 + i * 0.022
+        boxes.append(_tilted(label, 0.20, y, 0.40, y + 0.015, -6, page))
+        boxes.append(_tilted(value, 0.62, y, 0.70, y + 0.015, -6, page))
+    boxes.append(_tilted("Gracias por preferirnos oneCODE", 0.20, 0.70, 0.70, 0.715, -6, page))
+    lines = build_lines(boxes, [page])
+    by_row = {}
+    for ln in lines:
+        by_row.setdefault(ln.row, []).append(ln.text)
+    assert [r for r in by_row.values() if len(r) == 2] == [list(r) for r in rows]
+
+
+def test_stacked_lines_never_share_a_row():
+    # Name and address one under the other, slightly overlapping vertically, next to
+    # a tall right-hand block: they used to be glued into one line.
+    page = PageInfo(width=1000, height=1000)
+    boxes = [
+        Box("COMPAÑIA ECUATORIANA DEL TE CA CETCA", (0.173, 0.189, 0.406, 0.211), 0),
+        Box("Dir Matriz: JOAQUINA GALARZA E1-52", (0.173, 0.206, 0.408, 0.228), 0),
+        Box("FECHA Y HORA DE AUTORIZACION", (0.50, 0.195, 0.80, 0.215), 0),
+    ]
+    texts = [l.text for l in build_lines(boxes, [page])]
+    assert "COMPAÑIA ECUATORIANA DEL TE CA CETCA" in texts
+    assert "Dir Matriz: JOAQUINA GALARZA E1-52" in texts
+
+
+def test_upright_pdf_boxes_unchanged_by_deskew():
+    from app.layout import page_tilt
+    page = PageInfo(width=1000, height=1000)
+    boxes = [Box("SUBTOTAL", (0.1, 0.5, 0.3, 0.51), 0), Box("100.00", (0.8, 0.5, 0.9, 0.51), 0)]
+    assert page_tilt(boxes, page) == 0.0
+
+
 # --------------------------------------------------------------- pipeline ---
 
 def test_digital_pdf_all_green_without_ocr():

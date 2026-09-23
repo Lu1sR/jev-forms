@@ -1,85 +1,32 @@
 # Formulario "Registro de facturas para sorteo".
 #
-# Each field:
-#   key       stable id (CSV column, API)
-#   label     what the user sees
-#   question  what we ask the matcher: which line holds this value
-#   type      ruc | invoice_number | date | money | text  (picks the extractor)
-#   hints     keywords for the offline heuristic matcher (and nothing else)
-#   hidden    true = not shown in the form, only used for cross-checks
+# Same format the API accepts as JSON (full description in app/forms/__init__.py).
+# Fields whose key is a known role (ruc_emisor, fecha_emision, subtotal, iva,
+# total, ...) take the role's default type, label, question and hints, and get the
+# deterministic cross-checks (clave de acceso, subtotal + IVA = total).
+# Descuento, servicio and ICE are added automatically as hidden fields for the sum.
+#
+# Documents can be facturas, notas de venta or precuentas: questions must not
+# assume one kind.
 id: sorteo
 title: Registro de facturas para sorteo
 fields:
   - key: ruc_emisor
-    label: RUC del emisor
-    type: ruc
-    question: >-
-      ¿Qué línea contiene el RUC del EMISOR de la factura (la empresa que vende),
-      no el RUC o cédula del comprador/cliente?
-    hints: [ruc, r.u.c]
 
   - key: razon_social
     label: Razón social del emisor
     type: text
     question: >-
-      ¿Qué línea contiene la razón social o nombre de la empresa EMISORA
-      (quien vende), no el nombre del cliente ni el nombre comercial?
+      ¿Qué línea contiene la razón social de la empresa EMISORA (quien vende)? Si
+      no aparece, el nombre del negocio. No el nombre del cliente.
     hints: [razón social, razon social, s.a., cia. ltda, s.a.s]
 
   - key: numero_factura
-    label: Número de factura
-    type: invoice_number
-    question: >-
-      ¿Qué línea contiene el número de la factura (formato 001-001-000000123)?
-    hints: [factura, no., nro, número]
 
   - key: fecha_emision
-    label: Fecha de emisión
-    type: date
-    question: >-
-      ¿Qué línea contiene la fecha de emisión de la factura
-      (no la fecha de autorización)?
-    hints: [fecha emisión, fecha de emisión, fecha]
 
   - key: subtotal
-    label: Subtotal
-    type: money
-    question: >-
-      ¿Qué línea contiene el SUBTOTAL SIN IMPUESTOS (la base antes del IVA,
-      no "subtotal 15%" ni "subtotal 0%")?
-    hints: [subtotal sin impuestos, subtotal]
 
   - key: iva
-    label: IVA
-    type: money
-    question: ¿Qué línea contiene el valor del IVA cobrado?
-    hints: [iva 15%, iva 12%, iva]
 
   - key: total
-    label: Total
-    type: money
-    question: ¿Qué línea contiene el VALOR TOTAL a pagar de la factura?
-    hints: [valor total, total a pagar, total]
-
-  # --- Hidden: only used to make the subtotal + IVA = total check realistic ---
-  - key: descuento
-    label: Descuento
-    type: money
-    hidden: true
-    question: ¿Qué línea contiene el total de descuento de la factura?
-    hints: [total descuento, descuento]
-
-  - key: servicio
-    label: Servicio / propina
-    type: money
-    hidden: true
-    question: >-
-      ¿Qué línea contiene el valor de servicio o propina (por ejemplo 10% servicio)?
-    hints: [propina, servicio 10%, servicio]
-
-  - key: ice
-    label: ICE
-    type: money
-    hidden: true
-    question: ¿Qué línea contiene el valor del ICE?
-    hints: [ice]
