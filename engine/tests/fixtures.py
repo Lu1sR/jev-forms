@@ -31,6 +31,7 @@ def make_ride(
     servicio=None,
     total="115.00",
     clave=True,
+    item=("A001", "2", "Producto de ejemplo", "50.00"),
 ) -> bytes:
     ruc = ruc or company_ruc("099123457")
     d, m, y = fecha.split("/")
@@ -52,14 +53,20 @@ def make_ride(
     if clave:
         c = make_clave(f"{d}{m}{y}", ruc, *numero)
         t(320, 122, c, 7)
-    t(320, 137, "FECHA Y HORA DE AUTORIZACIÓN: 16/03/2025 10:22:01")
+    t(320, 137, f"FECHA Y HORA DE AUTORIZACIÓN: {fecha} 10:22:01")
     # Buyer
     t(40, 180, "Razón Social / Nombres y Apellidos: JUAN PÉREZ")
     t(360, 180, "Identificación: 0912345678")
     t(40, 195, f"Fecha Emisión: {fecha}")
     # Items
-    t(40, 240, "Cod.   Cant.   Descripción                         P.Unit    Total")
-    t(40, 255, "A001   2       Producto de ejemplo                 50.00     100.00")
+    for x, h in ((40, "Cod."), (75, "Cant."), (110, "Descripción"), (330, "P.Unit"), (380, "Total")):
+        t(x, 240, h)
+    code, qty, desc, unit = item
+    t(40, 255, code)
+    t(75, 255, qty)
+    t(110, 255, desc)
+    t(330, 255, unit)
+    t(380, 255, subtotal)
     # Totals table
     rows = [
         ("SUBTOTAL 15%", subtotal),

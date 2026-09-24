@@ -1,0 +1,209 @@
+.sheet {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 1.25rem;
+}
+
+/* A page plus a gutter on the right for marks on lines that end at the edge. */
+.wrap {
+  position: relative;
+  padding-right: 52px;
+  max-width: 100%;
+}
+
+/* Portrait receipts get at least a readable width (they then scroll past the
+   fold); wide documents are capped to what is left beside the notes. No
+   percentages: the column sizes itself to this. */
+.wrap[data-framed] {
+  width: min(
+    calc(52px + max(26rem, (100dvh - 7.5rem) * var(--ratio))),
+    calc(min(100vw, 90rem) - 34rem)
+  );
+}
+
+.page {
+  position: relative;
+  background: var(--paper);
+  box-shadow: var(--shadow-sheet);
+  line-height: 0;
+}
+
+/* clip, not hidden: a hidden box can still be scrolled by focus, and focusing
+   a line target while correcting would shift the whole photo. */
+.wrap[data-framed] .page {
+  overflow: hidden;
+  overflow: clip;
+}
+
+.frame {
+  position: relative;
+}
+
+.wrap[data-framed] .frame {
+  position: absolute;
+}
+
+.photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  user-select: none;
+}
+
+.wrap:not([data-framed]) .photo {
+  max-height: calc(100dvh - 7.5rem);
+  width: auto;
+  max-width: calc(min(100vw, 90rem) - 34rem - 52px);
+}
+
+.sheet[data-reading] .photo {
+  filter: saturate(0.6) contrast(0.95);
+  opacity: 0.72;
+  transition: opacity 0.4s var(--ease-out), filter 0.4s var(--ease-out);
+}
+
+/* Highlighter stroke at the line's own angle. Multiply keeps the printed ink
+   readable underneath; the uneven radius gives ragged ends. */
+.hl {
+  position: absolute;
+  background: var(--hl);
+  mix-blend-mode: multiply;
+  border-radius: 2px 5px 3px 6px / 6px 3px 5px 2px;
+  transform-origin: center;
+  clip-path: inset(0 0 0 0);
+  animation: sweep 0.46s var(--ease-out) both;
+  animation-delay: calc(var(--i) * 110ms);
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.hl[data-status="empty"] {
+  display: none;
+}
+
+.hl[data-status="yellow"] {
+  background: var(--hl-soft);
+}
+
+.hl[data-active] {
+  background: #f2d90f;
+  box-shadow: 0 0 0 2px var(--ink);
+  z-index: 2;
+}
+
+@keyframes sweep {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+
+/* A tag past the end of the line: the ink mark, then the reference number
+   circled in pen, matching the numbered note in the margin. */
+.tag {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  translate: 0 -50%;
+  z-index: 3;
+  pointer-events: none;
+  color: var(--ink-2);
+  animation: appear 0.3s var(--ease-out) both;
+  animation-delay: calc(var(--i) * 110ms + 0.3s);
+}
+
+.tag[data-status="green"] {
+  color: var(--ok);
+}
+
+.tag[data-status="yellow"] {
+  color: var(--warn);
+}
+
+.tag[data-status="corrected"] {
+  color: var(--pen);
+}
+
+.mark {
+  width: 24px;
+  height: 19px;
+  filter: drop-shadow(0 0 1.5px var(--paper)) drop-shadow(0 0 1.5px var(--paper));
+}
+
+.mark path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 0.4s var(--ease-out) forwards;
+  animation-delay: calc(var(--i) * 110ms + 0.35s);
+}
+
+.callout {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid currentColor;
+  border-radius: 50% 46% 52% 48% / 48% 52% 46% 50%;
+  background: var(--paper);
+  font: 500 0.6875rem/1 var(--font-figure);
+}
+
+.tag[data-active] .callout {
+  background: var(--hl);
+  color: var(--ink);
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Correction mode: every line becomes a target. */
+.pick {
+  position: absolute;
+  z-index: 3;
+  border: 1.5px dashed rgb(31 71 201 / 0.55);
+  border-radius: 3px;
+  background: rgb(31 71 201 / 0.05);
+  padding: 0;
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.pick:hover,
+.pick:focus-visible {
+  background: rgb(247 229 58 / 0.55);
+  border-color: var(--pen);
+  border-style: solid;
+}
+
+.sheet[data-picking] .hl,
+.sheet[data-picking] .tag {
+  opacity: 0.3;
+}
+
+@media (max-width: 900px) {
+  .sheet {
+    width: 100%;
+  }
+
+  .wrap:not([data-framed]) .photo {
+    max-width: 100%;
+  }
+
+  .wrap[data-framed] {
+    width: min(100%, calc(52px + (100dvh - 6rem) * var(--ratio)));
+  }
+
+  /* Phone strip after reading: only the marked lines, small enough that the
+     notes start in the first screen. */
+  .wrap[data-compact] {
+    width: min(100%, calc(52px + 40dvh * var(--ratio)));
+  }
+}

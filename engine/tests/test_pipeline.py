@@ -100,6 +100,11 @@ def test_tilted_photo_keeps_label_with_its_value():
     for ln in lines:
         by_row.setdefault(ln.row, []).append(ln.text)
     assert [r for r in by_row.values() if len(r) == 2] == [list(r) for r in rows]
+    # Each line also comes back as the tilted rectangle it was printed in.
+    total = next(ln for ln in lines if ln.text == "TOTAL")
+    cx, cy, w, h, deg = total.rect
+    assert round(deg) == -6
+    assert abs(w - 200) < 2 and abs(h - 21) < 2  # 0.20 x 0.015 of a 1000 x 1400 page
 
 
 def test_stacked_lines_never_share_a_row():

@@ -31,6 +31,10 @@ class Line:
     page: int
     row: int                     # lines on the same visual row share this index
     confidence: float = 1.0
+    # The line as printed on a tilted photo: centre x, centre y, width, height
+    # (page units, same as document dimensions) and angle in degrees. bbox is
+    # the axis-aligned box around it; rect lets a UI draw the line at its angle.
+    rect: tuple[float, float, float, float, float] | None = None
 
     def to_dict(self) -> dict:
         return asdict(self)
