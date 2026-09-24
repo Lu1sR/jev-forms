@@ -11,3 +11,8 @@ node_modules/
 engine/samples/*
 !engine/samples/README.md
 !engine/samples/expected.example.json
+.impeccable/review/
+.impeccable/mocks/
+*.tsbuildinfo
+next-env.d.ts
+.impeccable/questions/

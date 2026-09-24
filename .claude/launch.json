@@ -4,9 +4,30 @@
     {
       "name": "engine",
       "runtimeExecutable": "engine/.venv/bin/uvicorn",
-      "runtimeArgs": ["app.api:app", "--app-dir", "engine", "--port", "8000"],
+      "runtimeArgs": [
+        "app.api:app",
+        "--app-dir",
+        "engine",
+        "--port",
+        "8000"
+      ],
       "port": 8000,
       "url": "http://localhost:8000"
+    },
+    {
+      "name": "web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "web",
+        "run",
+        "dev",
+        "--",
+        "--port",
+        "3000"
+      ],
+      "port": 3000,
+      "url": "http://localhost:3000"
     }
   ]
 }
