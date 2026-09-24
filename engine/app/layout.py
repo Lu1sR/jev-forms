@@ -128,7 +128,10 @@ def build_lines(boxes: list[Box], pages: list[PageInfo]) -> list[Line]:
         page_boxes = [b for b in boxes if b.page == page_no and b.text.strip()]
         if not page_boxes:
             continue
-        items = _upright(page_boxes, page, page_tilt(page_boxes, page))
+        tilt = page_tilt(page_boxes, page)
+        items = _upright(page_boxes, page, tilt)
+        cx, cy = page.width / 2, page.height / 2
+        cos, sin = math.cos(tilt), math.sin(tilt)
 
         for row in _group_rows(items):
             row.sort(key=lambda i: i.x0)
@@ -141,6 +144,12 @@ def build_lines(boxes: list[Box], pages: list[PageInfo]) -> list[Line]:
                     segments.append([it])
             for seg in segments:
                 bs = [i.box for i in seg]
+                # Segment box in the upright frame, centre rotated back onto the page.
+                ux0, uy0 = min(i.x0 for i in seg), min(i.y0 for i in seg)
+                ux1, uy1 = max(i.x1 for i in seg), max(i.y1 for i in seg)
+                ucx, ucy = (ux0 + ux1) / 2 - cx, (uy0 + uy1) / 2 - cy
+                rect = (round(cx + ucx * cos - ucy * sin, 1), round(cy + ucx * sin + ucy * cos, 1),
+                        round(ux1 - ux0, 1), round(uy1 - uy0, 1), round(math.degrees(tilt), 2))
                 lines.append(Line(
                     id=f"L{len(lines) + 1}",
                     text=" ".join(b.text.strip() for b in bs),
@@ -149,6 +158,7 @@ def build_lines(boxes: list[Box], pages: list[PageInfo]) -> list[Line]:
                     page=page_no,
                     row=row_index,
                     confidence=round(min(b.confidence for b in bs), 3),
+                    rect=rect,
                 ))
             row_index += 1
     return lines
