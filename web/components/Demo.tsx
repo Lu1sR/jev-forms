@@ -1,10 +1,20 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { shrinkForUpload } from "@/lib/image";
 import { STATUS_LABEL, date, money, reason } from "@/lib/notes";
 import { valueFromLine } from "@/lib/parse";
-import { TEMPLATES, toEngineForm } from "@/lib/templates";
+import {
+  ALL_SAMPLES,
+  CUSTOM_ID,
+  EMPTY_CUSTOM,
+  TEMPLATES,
+  loadCustom,
+  loadTemplateId,
+  saveCustom,
+  saveTemplateId,
+  toEngineForm,
+} from "@/lib/templates";
 import type { Answer, ExtractResponse, FieldResult, FormField, Line } from "@/lib/types";
 import { FormEditor } from "./FormEditor";
 import { StatusMark } from "./Marks";
@@ -12,12 +22,9 @@ import { Sheet, type Mark } from "./Sheet";
 import s from "./Demo.module.css";
 
 const CONTACT_URL = process.env.NEXT_PUBLIC_CONTACT_URL;
+// mailto: links open the mail app; only web links get a new tab.
+const CONTACT_TARGET = CONTACT_URL?.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {};
 
-const SAMPLES = [
-  { file: "/samples/factura-electronica.pdf", label: "Factura electrónica", kind: "PDF" },
-  { file: "/samples/precuenta-restaurante.jpg", label: "Precuenta de restaurante", kind: "foto" },
-  { file: "/samples/precuenta-inclinada.jpg", label: "Foto inclinada", kind: "foto" },
-];
 
 type Phase = "idle" | "reading" | "done" | "error";
 
@@ -43,6 +50,7 @@ export function Demo() {
   const [templateId, setTemplateId] = useState(TEMPLATES[0].id);
   const [fields, setFields] = useState<FormField[]>(TEMPLATES[0].fields);
   const [editingForm, setEditingForm] = useState(false);
+  const [customTitle, setCustomTitle] = useState(EMPTY_CUSTOM.title);
 
   const [phase, setPhase] = useState<Phase>("idle");
   const [fileName, setFileName] = useState("");
@@ -69,7 +77,55 @@ export function Demo() {
   const cameraInput = useRef<HTMLInputElement>(null);
   const sheetRef = useRef<HTMLElement>(null);
   const marginRef = useRef<HTMLElement>(null);
-  const formTitle = TEMPLATES.find((t) => t.id === templateId)?.title ?? "Formulario";
+  const isCustom = templateId === CUSTOM_ID;
+  const formTitle = isCustom
+    ? customTitle.trim() || "Mi formulario"
+    : (TEMPLATES.find((t) => t.id === templateId)?.title ?? "Formulario");
+  const samples = isCustom ? ALL_SAMPLES : (TEMPLATES.find((t) => t.id === templateId)?.samples ?? []);
+
+  const chooseTemplate = (id: string) => {
+    setTemplateId(id);
+    saveTemplateId(id);
+    if (id === CUSTOM_ID) {
+      const c = loadCustom();
+      setCustomTitle(c.title);
+      setFields(c.fields);
+    } else {
+      setFields(TEMPLATES.find((x) => x.id === id)!.fields);
+    }
+  };
+  // Restore the last chosen form after hydration (the server can't see localStorage).
+  const restored = useRef(false);
+  useEffect(() => {
+    if (restored.current) return;
+    restored.current = true;
+    const id = loadTemplateId();
+    if (!id || id === TEMPLATES[0].id) return;
+    const c = id === CUSTOM_ID ? loadCustom() : null;
+    startTransition(() => {
+      setTemplateId(id);
+      if (c) {
+        setCustomTitle(c.title);
+        setFields(c.fields);
+      } else {
+        setFields(TEMPLATES.find((x) => x.id === id)!.fields);
+      }
+    });
+  }, []);
+
+  const editFields = (next: FormField[]) => {
+    setFields(next);
+    if (isCustom) saveCustom({ title: customTitle, fields: next });
+  };
+  const editTitle = (title: string) => {
+    setCustomTitle(title);
+    saveCustom({ title, fields });
+  };
+  const clearCustom = () => {
+    saveCustom(null);
+    setCustomTitle(EMPTY_CUSTOM.title);
+    setFields(EMPTY_CUSTOM.fields);
+  };
   // The fields the current result was read with (the editor may change `fields` later).
   const [readFields, setReadFields] = useState<FormField[]>(fields);
 
@@ -296,7 +352,7 @@ export function Demo() {
           jev<span className={s.wordmarkDot}>·</span>forms
         </button>
         {CONTACT_URL ? (
-          <a className={s.topLink} href={CONTACT_URL} target="_blank" rel="noreferrer">
+          <a className={s.topLink} href={CONTACT_URL} {...CONTACT_TARGET}>
             Me interesa
           </a>
         ) : null}
@@ -337,7 +393,23 @@ export function Demo() {
             onChange={(e) => onFiles(e.target.files)}
           />
 
-          {!hasSheet ? (
+          {editingForm && !hasSheet ? (
+            <div className={s.editorSheet}>
+              <FormEditor
+                templateId={templateId}
+                title={customTitle}
+                fields={fields}
+                onTemplate={chooseTemplate}
+                onTitle={editTitle}
+                onFields={editFields}
+                onClearCustom={clearCustom}
+                onDone={() => {
+                  setEditingForm(false);
+                  window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" });
+                }}
+              />
+            </div>
+          ) : !hasSheet ? (
             <div className={s.blank} data-dragging={dragging || undefined}>
               <div className={s.blankInner}>
                 <h1 className={s.title}>
@@ -372,9 +444,11 @@ export function Demo() {
                   <span className={s.dropHint}>o suéltalo sobre esta hoja</span>
                 </div>
                 <div className={s.samples}>
-                  <p className={s.samplesLabel}>¿No tienes uno a mano? Prueba con:</p>
+                  <p className={s.samplesLabel}>
+                    ¿No tienes uno a mano? Prueba con un ejemplo para «{formTitle}»:
+                  </p>
                   <ul>
-                    {SAMPLES.map((x) => (
+                    {samples.map((x) => (
                       <li key={x.file}>
                         <button type="button" className={s.sample} onClick={() => void trySample(x.file)}>
                           <span className={s.sampleName}>{x.label}</span> <span className={s.sampleKind}>{x.kind}</span>
@@ -431,35 +505,23 @@ export function Demo() {
         </section>
 
         <aside ref={marginRef} className={s.margin} aria-label="Formulario">
-          {editingForm ? (
-            <>
-              <h2 className={s.marginTitle}>Formulario</h2>
-              <FormEditor
-                templateId={templateId}
-                fields={fields}
-                onTemplate={(id) => {
-                  const t = TEMPLATES.find((x) => x.id === id)!;
-                  setTemplateId(id);
-                  setFields(t.fields);
-                }}
-                onFields={setFields}
-                onDone={() => setEditingForm(false)}
-              />
-            </>
-          ) : (
+          {(
             <>
               <div className={s.marginHead}>
                 <h2 className={s.marginTitle}>{formTitle}</h2>
-                {phase !== "reading" ? (
+                {editingForm ? (
+                  <span className={s.previewTag}>Vista previa</span>
+                ) : phase !== "reading" ? (
                   <button
                     type="button"
                     className={s.link}
                     onClick={() => {
                       if (phase === "done") reset();
                       setEditingForm(true);
+                      sheetRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
                     }}
                   >
-                    {phase === "done" ? "Usar otro formulario" : "Cambiar campos"}
+                    {phase === "done" ? "Usar otro formulario" : "Editar formulario"}
                   </button>
                 ) : null}
               </div>
@@ -603,7 +665,7 @@ export function Demo() {
                   {CONTACT_URL ? (
                     <p className={s.contact}>
                       ¿Te serviría para tu negocio?{" "}
-                      <a href={CONTACT_URL} target="_blank" rel="noreferrer">
+                      <a href={CONTACT_URL} {...CONTACT_TARGET}>
                         Escríbenos
                       </a>
                       .

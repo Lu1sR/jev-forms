@@ -20,7 +20,14 @@ export interface FormField {
   label: string;
   type: FieldType;
   role?: Role;
+  /** What to look for, in plain words ("el nombre del mesero"). */
   question?: string;
+}
+
+export interface Sample {
+  file: string;
+  label: string;
+  kind: "PDF" | "foto";
 }
 
 export interface FormTemplate {
@@ -28,6 +35,8 @@ export interface FormTemplate {
   title: string;
   blurb: string;
   fields: FormField[];
+  /** Example documents that fit this form. */
+  samples: Sample[];
 }
 
 export interface Line {

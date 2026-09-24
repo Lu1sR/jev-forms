@@ -22,6 +22,7 @@ Con el motor corriendo en `localhost:8000` (ver `engine/README.md`):
 
 ```bash
 cd web
+cp .env.example .env.local
 npm install
 npm run dev          # http://localhost:3000
 ```

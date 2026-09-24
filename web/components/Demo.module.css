@@ -90,6 +90,26 @@
   transition: box-shadow 0.2s var(--ease-out), translate 0.2s var(--ease-out);
 }
 
+/* The form editor gets the big sheet: the margin shows the form as it will
+   look (preview). */
+.editorSheet {
+  width: 100%;
+  min-height: calc(100dvh - 7.5rem);
+  padding: 2.5rem 3rem 3rem;
+  background: var(--paper);
+  box-shadow: var(--shadow-sheet);
+}
+
+.previewTag {
+  padding: 0.125rem 0.5rem;
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--radius);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
 .blank[data-dragging] {
   box-shadow: var(--shadow-lift), 0 0 0 3px var(--pen);
   translate: 0 -3px;
@@ -764,6 +784,11 @@
 
   .margin {
     padding: 1.25rem 1rem 1.5rem;
+  }
+
+  .editorSheet {
+    min-height: 0;
+    padding: 1.5rem 1rem 2rem;
   }
 
   .reading {
