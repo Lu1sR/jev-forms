@@ -1,0 +1,32 @@
+# Formulario "Registro de facturas para sorteo".
+#
+# Same format the API accepts as JSON (full description in app/forms/__init__.py).
+# Fields whose key is a known role (ruc_emisor, fecha_emision, subtotal, iva,
+# total, ...) take the role's default type, label, question and hints, and get the
+# deterministic cross-checks (clave de acceso, subtotal + IVA = total).
+# Descuento, servicio and ICE are added automatically as hidden fields for the sum.
+#
+# Documents can be facturas, notas de venta or precuentas: questions must not
+# assume one kind.
+id: sorteo
+title: Registro de facturas para sorteo
+fields:
+  - key: ruc_emisor
+
+  - key: razon_social
+    label: Razón social del emisor
+    type: text
+    question: >-
+      ¿Qué línea contiene la razón social de la empresa EMISORA (quien vende)? Si
+      no aparece, el nombre del negocio. No el nombre del cliente.
+    hints: [razón social, razon social, s.a., cia. ltda, s.a.s]
+
+  - key: numero_factura
+
+  - key: fecha_emision
+
+  - key: subtotal
+
+  - key: iva
+
+  - key: total
