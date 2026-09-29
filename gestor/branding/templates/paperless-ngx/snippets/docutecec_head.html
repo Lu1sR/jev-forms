@@ -1,0 +1,135 @@
+{# docutecec branding for Gestor: favicon, fonts and theme. Included in the app shell (index.html) and the account pages (base.html). Mirrors the landing tokens in landing/app/globals.css. #}
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231f4f7a'/%3E%3Crect x='5' y='5' width='22' height='22' fill='none' stroke='%23fff' stroke-width='2.5'/%3E%3Cpath d='M11 11h5.5a5 5 0 0 1 0 10H11z' fill='none' stroke='%23fff' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Chivo+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+	/* Spot ink #1f4f7a = hsl(208, 60%, 30%). paperless derives every primary shade from these two values. */
+	:root {
+		--pngx-primary: 208, 60% !important;
+		--pngx-primary-lightness: 30% !important;
+		--dt-spot: #1f4f7a;
+		--dt-spot-deep: #153a5b;
+		--dt-spot-rule: #a3b8cb;
+		--dt-spot-hair: #d3dee8;
+		--dt-spot-wash: #eef3f8;
+		--dt-ground: #e4e9ee;
+		--dt-ink: #121518;
+		--bs-body-font-family: "Archivo", system-ui, sans-serif;
+		--bs-font-monospace: "Chivo Mono", ui-monospace, monospace;
+		--bs-border-radius: 2px;
+		--bs-border-radius-sm: 2px;
+		--bs-border-radius-lg: 3px;
+		--bs-border-radius-xl: 4px;
+		--bs-border-radius-xxl: 4px;
+	}
+
+	[data-bs-theme="light"], :root:not([data-bs-theme="dark"]) {
+		--bs-link-color-rgb: 31, 79, 122;
+		--bs-link-hover-color-rgb: 21, 58, 91;
+		--pngx-bg-darker: var(--dt-spot-wash);
+	}
+
+	/* On dark surfaces the spot ink is lifted so buttons and links stay legible. */
+	[data-bs-theme="dark"] {
+		--pngx-primary-lightness: 45% !important;
+	}
+
+	body {
+		font-family: var(--bs-body-font-family);
+		-webkit-font-smoothing: antialiased;
+	}
+
+	h1, h2, h3, .h1, .h2, .h3 {
+		font-weight: 700;
+		letter-spacing: -0.015em;
+	}
+
+	/* Top bar: the docutecec wordmark, then the product name set like a form label. */
+	.navbar-brand .brand-logo {
+		height: 1.3rem !important;
+		max-width: none !important;
+	}
+
+	.navbar-brand .brand-copy {
+		margin-left: 0.75rem !important;
+		padding-left: 0.75rem;
+		border-left: 1px solid rgb(255 255 255 / 0.45);
+	}
+
+	.navbar-brand .brand-title {
+		font-size: 0.8rem;
+		font-weight: 600;
+		font-variation-settings: "wdth" 75;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+	}
+
+	.navbar-brand .byline {
+		display: none !important;
+	}
+
+	/* Account pages (login, password reset): a white form sheet on the grey ground, headed by a spot band. */
+	body.text-center {
+		--bs-body-bg: var(--dt-ground);
+		--bs-link-color-rgb: 31, 79, 122;
+		--bs-link-hover-color-rgb: 21, 58, 91;
+		--pngx-primary: var(--dt-spot);
+		--pngx-primary-hover: var(--dt-spot-deep);
+		--pngx-primary-active: #0f2c45;
+		background: var(--dt-ground);
+		color: var(--dt-ink);
+	}
+
+	.form-accounts {
+		max-width: 380px;
+		min-width: 320px;
+		padding: 0 2rem 2rem;
+		background: #fff;
+		border-top: 0.5rem solid var(--dt-spot);
+		box-shadow: 0 1px 2px rgb(21 58 91 / 0.08), 0 18px 40px -18px rgb(21 58 91 / 0.35);
+	}
+
+	.dt-brand {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 0.6rem;
+		margin: 0 -2rem 1.75rem;
+		padding: 1.75rem 2rem 1.25rem;
+		border-bottom: 1px solid var(--dt-spot-hair);
+		text-align: left;
+	}
+
+	.dt-brand .dt-wordmark {
+		width: 12rem;
+		height: auto;
+	}
+
+	.dt-product {
+		color: var(--dt-spot);
+		font-size: 0.75rem;
+		font-weight: 600;
+		font-variation-settings: "wdth" 75;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+
+	.form-accounts .btn-primary {
+		font-weight: 600;
+		letter-spacing: 0.02em;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		body.text-center {
+			--bs-body-bg: var(--dt-ground);
+			--bs-body-color: var(--dt-ink);
+			--bs-border-color: #dee2e6;
+		}
+
+		body.text-center .form-control,
+		body.text-center .form-floating {
+			--bs-body-bg: #fff;
+		}
+	}
+</style>
