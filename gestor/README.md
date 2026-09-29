@@ -11,7 +11,11 @@ the image only adds:
 - `branding/logo/docutecec_logo.svg`: white wordmark for the top bar, traced from
   Archivo (wdth 118, wght 800) so it renders without the webfont.
 - `custom-cont-init.d/`: copies the logo into `$PAPERLESS_MEDIA_ROOT/logo` on boot,
-  since `PAPERLESS_APP_LOGO` must live there.
+  since `PAPERLESS_APP_LOGO` must live there, and, when `GESTOR_DEMO_USER` and
+  `GESTOR_DEMO_PASSWORD` are set, creates the "Demo" group and user
+  (`branding/scripts/demo_user.py`: view/add/change on documents and metadata, no
+  deletes, workflows, mail, users or configuration). Demo documents must grant the
+  Demo group view/change, since documents owned by admin are private.
 
 When bumping the image tag, diff the two templates against the new upstream versions.
 
