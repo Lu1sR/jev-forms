@@ -37,3 +37,22 @@ if created:
     user.save()
 user.groups.add(group)
 print(f"[docutecec] demo user '{username}' {'created' if created else 'already exists'}")
+
+# First-visit UI for the demo user: Spanish, and the saved views shared with the Demo group
+# on the dashboard and sidebar. Only fills what is missing, so later changes in the UI stick.
+from guardian.shortcuts import get_objects_for_user
+
+from documents.models import SavedView
+from documents.models import UiSettings
+
+ui, _ = UiSettings.objects.get_or_create(user=user, defaults={"settings": {}})
+settings = dict(ui.settings or {})
+settings.setdefault("language", "es-es")
+if "saved_views" not in settings:
+    shared = get_objects_for_user(user, "documents.view_savedview", klass=SavedView, accept_global_perms=False)
+    ids = sorted(shared.values_list("id", flat=True))
+    if ids:
+        settings["saved_views"] = {"dashboard_views_visible_ids": ids, "sidebar_views_visible_ids": ids}
+        print(f"[docutecec] demo dashboard views: {ids}")
+ui.settings = settings
+ui.save()
