@@ -32,9 +32,22 @@
 		--pngx-bg-darker: var(--dt-spot-wash);
 	}
 
+	/* In dark mode upstream redeclares the primary on body (lightness) and on the top bar
+	   ("og green"), so those elements are overridden directly rather than through :root. */
+	.navbar.bg-primary {
+		--pngx-primary: 208, 60% !important;
+		--pngx-primary-lightness: 30% !important;
+	}
+
 	/* On dark surfaces the spot ink is lifted so buttons and links stay legible. */
-	[data-bs-theme="dark"] {
-		--pngx-primary-lightness: 45% !important;
+	[data-bs-theme="dark"] body {
+		--pngx-primary-lightness: 42% !important;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-bs-theme="light"]) body {
+			--pngx-primary-lightness: 42% !important;
+		}
 	}
 
 	body {
