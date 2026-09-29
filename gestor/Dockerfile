@@ -4,4 +4,5 @@ FROM ghcr.io/paperless-ngx/paperless-ngx:3.2.1
 
 COPY branding/templates/ /usr/src/paperless/src/documents/templates/
 COPY branding/logo/ /opt/docutecec/logo/
+COPY branding/scripts/ /opt/docutecec/scripts/
 COPY --chmod=755 custom-cont-init.d/ /custom-cont-init.d/
