@@ -169,9 +169,9 @@
 .pick {
   position: absolute;
   z-index: 3;
-  border: 1.5px dashed rgb(31 71 201 / 0.55);
+  border: 1.5px dashed rgb(31 79 122 / 0.55);
   border-radius: 3px;
-  background: rgb(31 71 201 / 0.05);
+  background: rgb(31 79 122 / 0.05);
   padding: 0;
   transition: background-color 0.15s, border-color 0.15s;
 }

@@ -1,0 +1,439 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-26T20:43:46.491622+00:00",
+  "title": "Design System: docutecec",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Desk Grey",
+        "canonical": "#e4e9ee",
+        "tonalRamp": [
+          "#1e262f",
+          "#31404e",
+          "#45596e",
+          "#59738d",
+          "#7c94ac",
+          "#a7b8c8",
+          "#d0d9e1",
+          "#eff2f5"
+        ]
+      },
+      "sheet": {
+        "role": "neutral",
+        "displayName": "Form White",
+        "canonical": "#ffffff",
+        "tonalRamp": [
+          "#262626",
+          "#404040",
+          "#595959",
+          "#737373",
+          "#949494",
+          "#b8b8b8",
+          "#d9d9d9",
+          "#f2f2f2"
+        ]
+      },
+      "celeste": {
+        "role": "neutral",
+        "displayName": "Carbon Celeste",
+        "canonical": "#e6eff7",
+        "tonalRamp": [
+          "#13273a",
+          "#1f4261",
+          "#2b5c87",
+          "#3876ae",
+          "#5d97cb",
+          "#93badc",
+          "#c5daec",
+          "#ecf3f9"
+        ]
+      },
+      "spot": {
+        "role": "primary",
+        "displayName": "Petrol Spot Ink",
+        "canonical": "#1f4f7a",
+        "tonalRamp": [
+          "#0d2236",
+          "#153a5b",
+          "#1f4f7a",
+          "#4a7399",
+          "#a3b8cb",
+          "#d3dee8",
+          "#e6eff7",
+          "#eef3f8"
+        ]
+      },
+      "spot-deep": {
+        "role": "primary",
+        "displayName": "Deep Petrol",
+        "canonical": "#153a5b",
+        "tonalRamp": [
+          "#0d2236",
+          "#153a5b",
+          "#1f4f7a",
+          "#4a7399",
+          "#a3b8cb",
+          "#d3dee8",
+          "#e6eff7",
+          "#eef3f8"
+        ]
+      },
+      "spot-rule": {
+        "role": "neutral",
+        "displayName": "Spot Rule",
+        "canonical": "#a3b8cb",
+        "tonalRamp": [
+          "#0d2236",
+          "#153a5b",
+          "#1f4f7a",
+          "#4a7399",
+          "#a3b8cb",
+          "#d3dee8",
+          "#e6eff7",
+          "#eef3f8"
+        ]
+      },
+      "spot-hair": {
+        "role": "neutral",
+        "displayName": "Spot Hair",
+        "canonical": "#d3dee8",
+        "tonalRamp": [
+          "#0d2236",
+          "#153a5b",
+          "#1f4f7a",
+          "#4a7399",
+          "#a3b8cb",
+          "#d3dee8",
+          "#e6eff7",
+          "#eef3f8"
+        ]
+      },
+      "spot-wash": {
+        "role": "neutral",
+        "displayName": "Spot Wash",
+        "canonical": "#eef3f8",
+        "tonalRamp": [
+          "#0d2236",
+          "#153a5b",
+          "#1f4f7a",
+          "#4a7399",
+          "#a3b8cb",
+          "#d3dee8",
+          "#e6eff7",
+          "#eef3f8"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Typed Ink",
+        "canonical": "#121518",
+        "tonalRamp": [
+          "#21262c",
+          "#374049",
+          "#4c5966",
+          "#627383",
+          "#8594a3",
+          "#adb8c2",
+          "#d3d9de",
+          "#f0f2f4"
+        ]
+      },
+      "ink-2": {
+        "role": "neutral",
+        "displayName": "Ink 2",
+        "canonical": "#414c57",
+        "tonalRamp": [
+          "#21262c",
+          "#374049",
+          "#4c5966",
+          "#627383",
+          "#8494a3",
+          "#adb8c2",
+          "#d3d9de",
+          "#f0f2f4"
+        ]
+      },
+      "ink-3": {
+        "role": "neutral",
+        "displayName": "Ink 3",
+        "canonical": "#5f6b76",
+        "tonalRamp": [
+          "#22262a",
+          "#394047",
+          "#505a63",
+          "#66737f",
+          "#88949f",
+          "#b0b8bf",
+          "#d5d9dd",
+          "#f1f2f4"
+        ]
+      },
+      "ok": {
+        "role": "status",
+        "displayName": "Verified Green",
+        "canonical": "#1d6b3b",
+        "tonalRamp": [
+          "#103c21",
+          "#1b6437",
+          "#268c4d",
+          "#31b564",
+          "#56d186",
+          "#8fe1ae",
+          "#c3efd4",
+          "#ebfaf1"
+        ]
+      },
+      "warn": {
+        "role": "status",
+        "displayName": "Query Red",
+        "canonical": "#b3261e",
+        "tonalRamp": [
+          "#420e0b",
+          "#6d1712",
+          "#99201a",
+          "#c52a21",
+          "#e05048",
+          "#eb8a85",
+          "#f4c0bd",
+          "#fbeae9"
+        ]
+      },
+      "hl": {
+        "role": "status",
+        "displayName": "Highlighter Yellow",
+        "canonical": "#f7e53a",
+        "tonalRamp": [
+          "#4a4303",
+          "#7b6f05",
+          "#ac9c07",
+          "#ddc809",
+          "#f7e431",
+          "#f9ed76",
+          "#fcf5b5",
+          "#fefce6"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Hero and closing lines only."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section statement, max 22ch."
+      },
+      "title": {
+        "displayName": "Band Title",
+        "purpose": "Section band text."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Explanatory copy in ink-2, max 60ch."
+      },
+      "label": {
+        "displayName": "Pre-printed Label",
+        "purpose": "Uppercase condensed field name, always attached to a value."
+      },
+      "figure": {
+        "displayName": "Typed Figure",
+        "purpose": "Every value typed into a field."
+      }
+    },
+    "shadows": [
+      {
+        "name": "sheet",
+        "value": "0 1px 2px rgb(21 58 91 / 0.08), 0 18px 40px -18px rgb(21 58 91 / 0.35)",
+        "purpose": "The form sheet on the desk; a document clipped onto a form."
+      },
+      {
+        "name": "press-edge",
+        "value": "inset 0 -2px 0 var(--spot-deep)",
+        "purpose": "Bottom edge of primary buttons."
+      },
+      {
+        "name": "field-underline",
+        "value": "0 1.5px 0 var(--spot)",
+        "purpose": "Thickened input baseline on focus."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Field fills, tag slide-in, verify row, demo arrow."
+      },
+      {
+        "name": "control",
+        "value": "0.15s",
+        "purpose": "Color, border and translate on buttons, links, chips."
+      },
+      {
+        "name": "fill",
+        "value": "0.2s to 0.4s",
+        "purpose": "Casillero highlight, highlighter lines, cross-check fade."
+      },
+      {
+        "name": "caret",
+        "value": "blink 0.9s steps(1) infinite",
+        "purpose": "Typing caret in a filling casillero."
+      },
+      {
+        "name": "clipped-tilt",
+        "value": "rotate: -1.2deg",
+        "purpose": "Source document on a form; 0 under 900px."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "stack",
+        "value": "1100px"
+      },
+      {
+        "name": "hero-form",
+        "value": "900px"
+      },
+      {
+        "name": "mobile",
+        "value": "760px"
+      },
+      {
+        "name": "quote-form",
+        "value": "720px"
+      },
+      {
+        "name": "archive",
+        "value": "640px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main action: WhatsApp, send quote.",
+      "html": "<button class=\"ds-btn-primary\"><svg class=\"ds-ico\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 6h16v12H4z\"/><path d=\"M4 7l8 6 8-6\"/></svg>Escríbanos</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;gap:.5rem;min-height:3.125rem;padding:0 1.375rem;border:0;border-radius:var(--radius,2px);background:var(--spot,#1f4f7a);color:#fff;font-family:Archivo,system-ui,sans-serif;font-size:1rem;font-weight:700;box-shadow:inset 0 -2px 0 var(--spot-deep,#153a5b);cursor:pointer;transition:background-color .15s,translate .15s}.ds-btn-primary:hover{background:var(--spot-deep,#153a5b)}.ds-btn-primary:active{translate:0 1px}.ds-btn-primary:focus-visible{outline:2px solid var(--spot,#1f4f7a);outline-offset:2px}.ds-ico{width:1.25rem;height:1.25rem}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Second action: try a demo.",
+      "html": "<button class=\"ds-btn-secondary\">Probar con un comprobante</button>",
+      "css": ".ds-btn-secondary{display:inline-flex;align-items:center;min-height:3.125rem;padding:0 1.375rem;border:1.5px solid var(--spot,#1f4f7a);border-radius:var(--radius,2px);background:#fff;color:var(--spot,#1f4f7a);font-family:Archivo,system-ui,sans-serif;font-size:1rem;font-weight:700;cursor:pointer;transition:background-color .15s,translate .15s}.ds-btn-secondary:hover{background:var(--spot-wash,#eef3f8)}.ds-btn-secondary:active{translate:0 1px}.ds-btn-secondary:focus-visible{outline:2px solid var(--spot,#1f4f7a);outline-offset:2px}"
+    },
+    {
+      "name": "Section Band",
+      "kind": "custom",
+      "refersTo": "band",
+      "description": "Solid spot-ink section heading.",
+      "html": "<div class=\"ds-band\"><span class=\"ds-band-name\">Formularios</span><span class=\"ds-band-text\">El comprobante entra, los datos salen listos</span></div>",
+      "css": ".ds-band{display:flex;flex-wrap:wrap;align-items:baseline;gap:.25rem 1rem;padding:.875rem 1.5rem;background:var(--spot,#1f4f7a);color:#fff;font-family:Archivo,system-ui,sans-serif;font-size:1.5rem;font-weight:700;line-height:1.2;letter-spacing:-.015em}.ds-band-name{font-weight:800;font-variation-settings:'wdth' 112}.ds-band-name::after{content:'·';margin-left:1rem;color:rgb(255 255 255/.55)}.ds-band-text{font-weight:500}"
+    },
+    {
+      "name": "Casillero",
+      "kind": "custom",
+      "refersTo": "casillero-code",
+      "description": "Coded form field with typed mono value and status mark.",
+      "html": "<div class=\"ds-cas\"><span class=\"ds-cas-code\">101</span><span class=\"ds-cas-label\">RUC del emisor</span><span class=\"ds-cas-value\">1790012345001</span><span class=\"ds-cas-state\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4.5 12.5l4.5 4.5L19.5 6.5\"/></svg>Listo</span></div>",
+      "css": ".ds-cas{display:grid;grid-template-columns:2.75rem minmax(0,1fr) auto;grid-template-areas:'code label state' 'code value state';column-gap:.75rem;align-items:center;padding-right:.75rem;border:1.5px solid var(--spot,#1f4f7a);background:#fff;transition:background-color .2s cubic-bezier(.16,1,.3,1)}.ds-cas:hover{background:rgb(247 229 58/.22)}.ds-cas-code{grid-area:code;align-self:stretch;display:grid;place-items:center;border-right:1px solid var(--spot-hair,#d3dee8);background:var(--spot-wash,#eef3f8);color:var(--spot,#1f4f7a);font-family:'Chivo Mono',ui-monospace,monospace;font-size:.6875rem;font-weight:600}.ds-cas-label{grid-area:label;padding-top:.4375rem;color:var(--spot,#1f4f7a);font-family:Archivo,system-ui,sans-serif;font-size:.6875rem;font-weight:600;font-variation-settings:'wdth' 80;letter-spacing:.04em;text-transform:uppercase}.ds-cas-value{grid-area:value;padding-bottom:.4375rem;color:var(--ink,#121518);font-family:'Chivo Mono',ui-monospace,monospace;font-size:.9375rem;font-weight:500}.ds-cas-state{grid-area:state;display:inline-flex;align-items:center;gap:.25rem;color:var(--ok,#1d6b3b);font-family:Archivo,system-ui,sans-serif;font-size:.6875rem;font-weight:700}.ds-cas-state svg{width:1rem;height:1rem}"
+    },
+    {
+      "name": "Field Input",
+      "kind": "input",
+      "refersTo": "field-input",
+      "description": "Baseline input inside a ruled cell; value typed in mono.",
+      "html": "<label class=\"ds-cell\"><span class=\"ds-cell-head\"><span class=\"ds-code\">308</span><span class=\"ds-label\">Empresa (opcional)</span></span><input class=\"ds-input\" placeholder=\"Razón social o nombre comercial\"></label>",
+      "css": ".ds-cell{display:block;padding:.5rem .875rem .75rem;border:1.5px solid var(--spot,#1f4f7a);background:#fff}.ds-cell:focus-within{background:var(--spot-wash,#eef3f8)}.ds-cell-head{display:flex;align-items:center;gap:.5rem;margin-bottom:.4375rem}.ds-code{display:inline-grid;place-items:center;min-width:2rem;padding:0 .25rem;border:1px solid var(--spot-rule,#a3b8cb);background:var(--spot-wash,#eef3f8);color:var(--spot,#1f4f7a);font-family:'Chivo Mono',ui-monospace,monospace;font-size:.6875rem;font-weight:600;line-height:1.6}.ds-label{color:var(--spot,#1f4f7a);font-family:Archivo,system-ui,sans-serif;font-size:.6875rem;font-weight:600;font-variation-settings:'wdth' 80;letter-spacing:.04em;text-transform:uppercase}.ds-input{display:block;width:100%;height:2.25rem;padding:0;border:0;border-bottom:1.5px solid var(--ink,#121518);border-radius:0;background:transparent;color:var(--ink,#121518);font-family:'Chivo Mono',ui-monospace,monospace;font-size:1rem;font-weight:500}.ds-input::placeholder{color:var(--ink-3,#5f6b76);font-family:Archivo,system-ui,sans-serif;font-size:.8125rem}.ds-input:focus-visible{outline:none;border-bottom-color:var(--spot,#1f4f7a);box-shadow:0 1.5px 0 var(--spot,#1f4f7a)}"
+    },
+    {
+      "name": "Option Box",
+      "kind": "chip",
+      "refersTo": "option-box",
+      "description": "Selectable option with the form's typed-X tick box.",
+      "html": "<label class=\"ds-opt\"><input type=\"checkbox\" checked><span class=\"ds-box\"></span><span class=\"ds-opt-text\"><b>Suite completa</b><span>Los dos, trabajando juntos</span></span></label>",
+      "css": ".ds-opt{position:relative;display:inline-flex;gap:.625rem;align-items:flex-start;padding:.625rem .75rem;border:1px solid var(--spot-rule,#a3b8cb);border-radius:var(--radius,2px);background:#fff;font-family:Archivo,system-ui,sans-serif;cursor:pointer;transition:border-color .15s,background-color .15s}.ds-opt:hover{border-color:var(--spot,#1f4f7a)}.ds-opt input{position:absolute;opacity:0}.ds-box{flex:none;width:1.125rem;height:1.125rem;margin-top:.125rem;border:1.5px solid var(--spot,#1f4f7a);background:#fff}.ds-opt:has(input:checked){border-color:var(--spot,#1f4f7a);background:var(--spot-wash,#eef3f8)}.ds-opt input:checked~.ds-box{background:linear-gradient(45deg,transparent 42%,var(--ink,#121518) 42% 58%,transparent 58%),linear-gradient(-45deg,transparent 42%,var(--ink,#121518) 42% 58%,transparent 58%),#fff}.ds-opt input:focus-visible~.ds-box{outline:2px solid var(--spot,#1f4f7a);outline-offset:2px}.ds-opt-text{display:grid;line-height:1.3}.ds-opt-text b{font-weight:700;color:var(--ink,#121518)}.ds-opt-text span{color:var(--ink-2,#414c57);font-size:.8125rem}"
+    },
+    {
+      "name": "Header Navigation",
+      "kind": "nav",
+      "description": "Sticky form header strip: wordmark, links, WhatsApp.",
+      "html": "<nav class=\"ds-top\"><span class=\"ds-mark\">docutec<span class=\"ds-mark-box\">ec</span></span><span class=\"ds-nav\"><a href=\"#\">Formularios</a><a href=\"#\">Gestor</a><a href=\"#\">Cotizar</a></span></nav>",
+      "css": ".ds-top{display:flex;align-items:center;gap:1.5rem;min-height:4rem;padding:.5rem 1.5rem;border-bottom:1.5px solid var(--spot,#1f4f7a);background:rgb(255 255 255/.96);font-family:Archivo,system-ui,sans-serif}.ds-mark{display:inline-flex;align-items:center;gap:.2em;color:var(--spot,#1f4f7a);font-size:1.375rem;font-weight:800;font-variation-settings:'wdth' 118;letter-spacing:-.035em;line-height:1}.ds-mark-box{padding:.12em .2em .16em;border:2px solid currentColor;font-size:.8em;font-variation-settings:'wdth' 100}.ds-nav{display:flex;gap:.25rem;margin-left:auto}.ds-nav a{padding:.5rem .75rem;color:var(--ink,#121518);font-size:.9375rem;font-weight:600;text-decoration:none;border-bottom:2px solid transparent;transition:border-color .15s}.ds-nav a:hover{border-bottom-color:var(--spot,#1f4f7a)}.ds-nav a:focus-visible{outline:2px solid var(--spot,#1f4f7a);outline-offset:2px}"
+    },
+    {
+      "name": "Tag Chip",
+      "kind": "chip",
+      "refersTo": "tag-chip",
+      "description": "Archive document tag.",
+      "html": "<span class=\"ds-tag\">compras</span> <span class=\"ds-tag\">vence 2027</span>",
+      "css": ".ds-tag{display:inline-block;padding:0 .375rem;border:1px solid var(--spot-rule,#a3b8cb);color:var(--spot,#1f4f7a);font-family:Archivo,system-ui,sans-serif;font-size:.6875rem;font-weight:600;line-height:1.6;white-space:nowrap}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Filled Tax Form",
+    "overview": "\n**Creative North Star: \"The Filled Tax Form\"**\n\nEvery surface is a form sheet pre-printed in a single petrol-blue spot ink, with docutecec's own data typed into its casilleros. The sheet sits on a cool grey desk, framed by one spot-ink border and a soft paper shadow. Structure comes from ruled lines, not cards: sections open with solid spot-ink bands, content lives in ruled boxes and definition rows, and every filled value is set in a typewriter-like mono. Density is that of a real administrative form: tight rows, small narrow labels, generous display lines only where the page speaks.\n\nThe world is light only, because a form is paper. Color is almost monochrome: spot ink, its tints, near-black ink and white. A carbon-copy celeste sheet marks a second paper (the Gestor section). Green and red appear only as status marks on a field, and a yellow highlighter appears only where a document is being read.",
+    "keyCharacteristics": [
+      "One spot ink (petrol blue) prints every rule, band, label and code.",
+      "Values typed in Chivo Mono; labels and headings in Archivo at varying widths.",
+      "Ruled boxes with three-digit casillero codes are the base unit of layout.",
+      "Near-square corners (2px) or none; hairlines at 1px, structural rules at 1.5px.",
+      "Status is carried by a mark (check, query, dash) plus a word, never color alone."
+    ],
+    "rules": [
+      {
+        "name": "The One Ink Rule",
+        "body": "Everything printed on the form is spot or a tint of spot. A second hue is never used for decoration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Status Mark Rule",
+        "body": "Green, red and yellow exist only as marks on data: verified, needs review, being read. Never as section color, button fill or illustration.",
+        "section": "colors"
+      },
+      {
+        "name": "The Carbon Copy Rule",
+        "body": "Celeste marks a different paper, one section at a time; it is not a card background.",
+        "section": "colors"
+      },
+      {
+        "name": "The Typed Value Rule",
+        "body": "If it is data a person or the system wrote into the form, it is mono. If the form printed it, it is Archivo.",
+        "section": "typography"
+      },
+      {
+        "name": "The Width Axis Rule",
+        "body": "Hierarchy moves along the width axis as much as weight: labels 80 to 90, body 100, display 104 to 112, wordmark 118.",
+        "section": "typography"
+      },
+      {
+        "name": "The Paper Only Rule",
+        "body": "A shadow means a separate piece of paper. Panels, cards and buttons printed on the sheet stay flat.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Clipped Document Rule",
+        "body": "A source document laid on the form may tilt slightly (-1.2deg) with the sheet shadow; it straightens on narrow screens.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do build every panel as a ruled box: 1.5px spot outside, 1px spot-rule or spot-hair inside.",
+      "Do set every typed value (codes, amounts, dates, hosts, inputs, messages) in Chivo Mono.",
+      "Do pair every field label with the value or input it names; labels are the form's pre-print.",
+      "Do open sections with a spot band, and close them with a 1.5px spot rule.",
+      "Do carry status with an icon and a word as well as color.",
+      "Do mark synthetic demonstration data as such inside the panel head."
+    ],
+    "donts": [
+      "Don't introduce a second decorative hue; green, red and yellow are status marks only.",
+      "Don't use rounded cards, pills or radii above 2px (the highlighter stroke is the sole exception).",
+      "Don't add shadows to anything that is not a separate piece of paper.",
+      "Don't use the uppercase label style as a free-floating heading above a headline; it only names a field.",
+      "Don't use a dark theme; the form is paper."
+    ]
+  }
+}

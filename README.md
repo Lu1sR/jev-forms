@@ -7,7 +7,8 @@ semáforo de confianza por campo.
 | Servicio | Qué es | Estado |
 |----------|--------|--------|
 | `engine/` | Python: lectura (PyMuPDF / RapidOCR), emparejamiento con Jev, validación; CLI y API HTTP | Motor y API listos |
-| `web/`    | Next.js: interfaz de la demo | Fase 2 (pendiente) |
+| `web/`    | Next.js: interfaz de la demo (formularios.docutecec.com) | Lista |
+| `landing/` | Next.js: página comercial de docutecec (docutecec.com) | Lista |
 
 Se desplegará en Railway: `web` público y `engine` solo por la red privada.
 Detalles del motor y de la API en [`engine/README.md`](engine/README.md).

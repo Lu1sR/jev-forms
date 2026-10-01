@@ -56,7 +56,12 @@ access key.
 
 ## Brand Commitments
 
-No brand yet: neutral name "jev-forms". No logo, colors or voice have been set.
+Brand: **docutecec** (docutecec.com), B2B for Ecuadorian companies, serious tone, Spanish
+"usted". This product is sold as **Formularios** (demo at formularios.docutecec.com)
+alongside **Gestor**, a paperless-ngx based document manager (gestor.docutecec.com),
+separately or together; Gestor runs in docutecec's cloud or on the client's server.
+Quote only, no public prices. The landing lives in `landing/` (landing/DESIGN.md); the demo in
+`web/` follows DESIGN.md, which now uses the same docutecec palette and type.
 
 ## Evidence on Hand
 
