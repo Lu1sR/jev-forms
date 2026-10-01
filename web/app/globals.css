@@ -1,29 +1,32 @@
-/* The accountant's desk: a white sheet on a gray-green blotter, marked in
-   highlighter and ink. Light only: people try this on a phone, often in
+/* docutecec Formularios: the visitor's receipt on a white sheet, reviewed in
+   one petrol-blue spot ink plus highlighter, the same palette as the landing
+   (landing/app/globals.css). Light only: people try this on a phone, often in
    daylight or a bright office. */
 
 :root {
   color-scheme: light;
 
-  --blotter: #d6ddd7;
+  --blotter: #e4e9ee;
   --paper: #ffffff;
-  --ink: #1b1d1c;
-  --ink-2: #4a504c;
-  --ink-3: #6a716c;
-  --rule: #d3d8d4;
-  --rule-strong: #aeb5b0;
+  --ink: #121518;
+  --ink-2: #414c57;
+  --ink-3: #5f6b76;
+  --rule: #d3dee8;
+  --rule-strong: #a3b8cb;
 
   --hl: #f7e53a;
   --hl-soft: #fbf2a0;
-  --ok: #13703f;
-  --warn: #bf2f28;
-  --pen: #1f47c9;
+  --ok: #1d6b3b;
+  --warn: #b3261e;
+  --pen: #1f4f7a;
+  --pen-deep: #153a5b;
+  --pen-wash: #eef3f8;
 
-  --shadow-sheet: 0 1px 1px rgb(27 29 28 / 0.06), 0 8px 24px -6px rgb(27 29 28 / 0.18);
-  --shadow-lift: 0 2px 4px rgb(27 29 28 / 0.08), 0 14px 32px -10px rgb(27 29 28 / 0.28);
+  --shadow-sheet: 0 1px 1px rgb(21 58 91 / 0.08), 0 18px 40px -18px rgb(21 58 91 / 0.35);
+  --shadow-lift: 0 2px 4px rgb(21 58 91 / 0.1), 0 14px 32px -10px rgb(21 58 91 / 0.4);
 
-  --font-text: var(--font-atkinson), "Atkinson Hyperlegible Next", system-ui, sans-serif;
-  --font-figure: var(--font-atkinson-mono), "Atkinson Hyperlegible Mono", ui-monospace, monospace;
+  --font-text: var(--font-archivo), "Archivo", system-ui, sans-serif;
+  --font-figure: var(--font-chivo-mono), "Chivo Mono", ui-monospace, monospace;
 
   --step--1: 0.8125rem;
   --step-0: 1rem;
@@ -32,7 +35,7 @@
   --step-3: clamp(1.75rem, 1.2rem + 2.2vw, 2.625rem);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  --radius: 3px;
+  --radius: 2px;
 }
 
 *,

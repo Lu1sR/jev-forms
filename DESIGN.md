@@ -1,65 +1,65 @@
 ---
-name: jev-forms
+name: docutecec Formularios
 description: The visitor's own receipt, reviewed on the desk the way an accountant marks an original.
 colors:
-  blotter: "#d6ddd7"
+  blotter: "#e4e9ee"
   paper: "#ffffff"
-  paper-inset: "#f3f5f3"
-  ink: "#1b1d1c"
-  ink-deep: "#000000"
-  ink-2: "#4a504c"
-  ink-3: "#6a716c"
-  rule: "#d3d8d4"
-  rule-strong: "#aeb5b0"
+  paper-inset: "#eef3f8"
+  ink: "#121518"
+  ink-deep: "#153a5b"
+  ink-2: "#414c57"
+  ink-3: "#5f6b76"
+  rule: "#d3dee8"
+  rule-strong: "#a3b8cb"
   highlighter: "#f7e53a"
   highlighter-soft: "#fbf2a0"
   highlighter-pressed: "#f2d90f"
-  ok-ink: "#13703f"
-  warn-ink: "#bf2f28"
-  pen: "#1f47c9"
-  pen-deep: "#16389f"
+  ok-ink: "#1d6b3b"
+  warn-ink: "#b3261e"
+  pen: "#1f4f7a"
+  pen-deep: "#153a5b"
 typography:
   display:
-    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontFamily: "Archivo, system-ui, sans-serif"
     fontSize: "clamp(1.75rem, 1.2rem + 2.2vw, 2.625rem)"
     fontWeight: 800
     lineHeight: 1.08
     letterSpacing: "-0.02em"
   headline:
-    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontFamily: "Archivo, system-ui, sans-serif"
     fontSize: "1.5rem"
     fontWeight: 800
     lineHeight: 1.15
     letterSpacing: "-0.02em"
   title:
-    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontFamily: "Archivo, system-ui, sans-serif"
     fontSize: "1.1875rem"
     fontWeight: 700
     lineHeight: 1.3
   body:
-    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontFamily: "Archivo, system-ui, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.5
   lede:
-    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontFamily: "Archivo, system-ui, sans-serif"
     fontSize: "1.1875rem"
     fontWeight: 400
     lineHeight: 1.45
   label:
-    fontFamily: "Atkinson Hyperlegible Next, system-ui, sans-serif"
+    fontFamily: "Archivo, system-ui, sans-serif"
     fontSize: "0.8125rem"
     fontWeight: 700
     lineHeight: 1.4
   figure:
-    fontFamily: "Atkinson Hyperlegible Mono, ui-monospace, monospace"
+    fontFamily: "Chivo Mono, ui-monospace, monospace"
     fontSize: "1.1875rem"
     fontWeight: 500
     lineHeight: 1.3
     letterSpacing: "-0.01em"
     fontFeature: "\"tnum\" 1"
   figure-small:
-    fontFamily: "Atkinson Hyperlegible Mono, ui-monospace, monospace"
+    fontFamily: "Chivo Mono, ui-monospace, monospace"
     fontSize: "0.75rem"
     fontWeight: 500
     lineHeight: 1
@@ -138,6 +138,10 @@ components:
     rounded: "{rounded.sm}"
     padding: "0.875rem 1rem"
 ---
+> Rebranded to docutecec (2026-10): colors and type now follow `landing/DESIGN.md`
+> (spot ink #1f4f7a on #e4e9ee, Archivo + Chivo Mono, docutec[ec] wordmark). Token names
+> below keep their original meaning (pen = the spot ink).
+
 
 # Design System: jev-forms
 

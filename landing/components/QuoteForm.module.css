@@ -1,0 +1,252 @@
+.form {
+  display: grid;
+  border: 1.5px solid var(--spot);
+  background: var(--sheet);
+}
+
+.row,
+.cell,
+.preview {
+  margin: 0;
+  padding: 0.5rem 0.875rem 0.75rem;
+  border: 0;
+  border-bottom: 1px solid var(--spot-hair);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  float: left;
+  width: 100%;
+  margin-bottom: 0.4375rem;
+  padding: 0;
+}
+
+.row > .options {
+  clear: both;
+}
+
+.code {
+  display: inline-grid;
+  place-items: center;
+  min-width: 2rem;
+  padding: 0 0.25rem;
+  border: 1px solid var(--spot-rule);
+  background: var(--spot-wash);
+  color: var(--spot);
+  font-family: var(--font-figure);
+  font-size: var(--step--2);
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.label {
+  color: var(--spot);
+  font-size: var(--step--2);
+  font-weight: 600;
+  font-variation-settings: "wdth" 80;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.option {
+  position: relative;
+  display: flex;
+  gap: 0.625rem;
+  align-items: flex-start;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--spot-rule);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background-color 0.15s;
+}
+
+.option:hover {
+  border-color: var(--spot);
+}
+
+.option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The form's own tick box: an X typed into the square. */
+.box {
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.125rem;
+  border: 1.5px solid var(--spot);
+  background: #fff;
+}
+
+.option input:checked ~ .box {
+  background:
+    linear-gradient(45deg, transparent 42%, var(--ink) 42% 58%, transparent 58%),
+    linear-gradient(-45deg, transparent 42%, var(--ink) 42% 58%, transparent 58%),
+    #fff;
+}
+
+.option:has(input:checked) {
+  border-color: var(--spot);
+  background: var(--spot-wash);
+}
+
+.option input:focus-visible ~ .box {
+  outline: 2px solid var(--spot);
+  outline-offset: 2px;
+}
+
+.optText {
+  display: grid;
+  gap: 0.0625rem;
+  line-height: 1.3;
+}
+
+.optText b {
+  font-weight: 700;
+}
+
+.optText span {
+  color: var(--ink-2);
+  font-size: var(--step--1);
+}
+
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.pair .cell + .cell {
+  border-left: 1px solid var(--spot-hair);
+}
+
+.cell {
+  display: block;
+}
+
+.cell select,
+.cell input {
+  clear: both;
+  display: block;
+  width: 100%;
+  height: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-bottom: 1.5px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--font-figure);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.cell select {
+  appearance: none;
+  padding-right: 1.5rem;
+  background: no-repeat right 0.25rem center / 0.75rem
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%231f4f7a' stroke-width='1.75' stroke-linecap='round'/%3E%3C/svg%3E");
+  cursor: pointer;
+}
+
+.cell input::placeholder {
+  color: var(--ink-3);
+  font-family: var(--font-text);
+  font-size: var(--step--1);
+}
+
+.cell select:focus-visible,
+.cell input:focus-visible {
+  outline: none;
+  border-bottom-color: var(--spot);
+  box-shadow: 0 1.5px 0 var(--spot);
+}
+
+.cell:focus-within {
+  background: var(--spot-wash);
+}
+
+.preview {
+  background: var(--spot-wash);
+}
+
+.message {
+  clear: both;
+  font-family: var(--font-figure);
+  font-size: var(--step--1);
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.submit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+  padding: 1rem 0.875rem 1.125rem;
+}
+
+.send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+  padding: 0 1.375rem;
+  border-radius: var(--radius);
+  background: var(--spot);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: inset 0 -2px 0 var(--spot-deep);
+  transition:
+    background-color 0.15s,
+    translate 0.15s;
+}
+
+.send:hover {
+  background: var(--spot-deep);
+}
+
+.send:active {
+  translate: 0 1px;
+}
+
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.fine {
+  color: var(--ink-2);
+  font-size: var(--step--1);
+}
+
+@media (max-width: 720px) {
+  .options {
+    grid-template-columns: 1fr;
+  }
+
+  .pair {
+    grid-template-columns: 1fr;
+  }
+
+  .pair .cell + .cell {
+    border-left: 0;
+  }
+
+  .send {
+    width: 100%;
+  }
+}

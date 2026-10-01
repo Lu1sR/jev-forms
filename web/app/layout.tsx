@@ -1,31 +1,32 @@
 import type { Metadata, Viewport } from "next";
-import { Atkinson_Hyperlegible_Mono, Atkinson_Hyperlegible_Next } from "next/font/google";
+import { Archivo, Chivo_Mono } from "next/font/google";
 import "./globals.css";
 
-// Hyperlegible: phone photos get checked outdoors and in bad light; figures and
-// keys need unambiguous 0/O, 1/l, 5/S.
-const text = Atkinson_Hyperlegible_Next({
+// docutecec type, shared with the landing: Archivo for text (narrow for labels,
+// wide and heavy for the wordmark), Chivo Mono for every figure read off a receipt.
+const text = Archivo({
   subsets: ["latin"],
-  weight: ["400", "500", "700", "800"],
-  variable: "--font-atkinson",
+  axes: ["wdth"],
+  variable: "--font-archivo",
   display: "swap",
 });
 
-const figures = Atkinson_Hyperlegible_Mono({
+const figures = Chivo_Mono({
   subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-atkinson-mono",
+  weight: ["400", "500", "600"],
+  variable: "--font-chivo-mono",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "jev-forms · tu comprobante, revisado",
+  metadataBase: new URL("https://formularios.docutecec.com"),
+  title: "Formularios · docutecec · su comprobante, revisado",
   description:
-    "Sube una foto o PDF de una factura, nota de venta o precuenta y mira cada dato marcado: qué está listo, qué conviene revisar y qué no aparece.",
+    "Suba una foto o PDF de una factura, nota de venta o precuenta y vea cada dato marcado: qué está listo, qué conviene revisar y qué no aparece.",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#d6ddd7",
+  themeColor: "#1f4f7a",
   width: "device-width",
   initialScale: 1,
 };

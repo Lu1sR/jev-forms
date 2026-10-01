@@ -348,8 +348,13 @@ export function Demo() {
   return (
     <div className={s.desk} data-phase={phase}>
       <header className={s.top}>
-        <button type="button" className={s.wordmark} onClick={reset} aria-label="jev-forms, volver al inicio">
-          jev<span className={s.wordmarkDot}>·</span>forms
+        <button type="button" className={s.wordmark} onClick={reset} aria-label="docutecec Formularios, volver al inicio">
+          <span className={s.wordmarkName} aria-hidden="true">
+            docutec<span className={s.wordmarkBox}>ec</span>
+          </span>
+          <span className={s.wordmarkProduct} aria-hidden="true">
+            Formularios
+          </span>
         </button>
         {CONTACT_URL ? (
           <a className={s.topLink} href={CONTACT_URL} {...CONTACT_TARGET}>
