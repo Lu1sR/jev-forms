@@ -3,7 +3,16 @@ import HeroForm from "@/components/HeroForm";
 import { ArrowIcon, CheckIcon, DashIcon, MailIcon, QueryIcon, WhatsAppIcon } from "@/components/Icons";
 import QuoteForm from "@/components/QuoteForm";
 import Wordmark from "@/components/Wordmark";
-import { FORMULARIOS_URL, GESTOR_URL, HAS_WHATSAPP, SALES_EMAIL, contactHref, hostOf } from "@/lib/site";
+import {
+  FORMULARIOS_URL,
+  GESTOR_DEMO_PASSWORD,
+  GESTOR_DEMO_USER,
+  GESTOR_URL,
+  HAS_WHATSAPP,
+  SALES_EMAIL,
+  contactHref,
+  hostOf,
+} from "@/lib/site";
 import styles from "./page.module.css";
 
 const FORMULARIOS_POINTS = [
@@ -255,11 +264,25 @@ export default function Home() {
                     <span>Los documentos no salen de la red de su empresa.</span>
                   </div>
                 </div>
-                <a className={styles.demoLink} href={GESTOR_URL}>
-                  <span className={styles.demoLabel}>Demo abierta</span>
-                  <span className={styles.demoHost}>{hostOf(GESTOR_URL)}</span>
-                  <ArrowIcon className={styles.btnIcon} />
-                </a>
+                <div className={styles.demoAccess}>
+                  <a className={styles.demoLink} href={GESTOR_URL} target="_blank" rel="noopener">
+                    <span className={styles.demoLabel}>Entrar a la demo</span>
+                    <span className={styles.demoHost}>{hostOf(GESTOR_URL)}</span>
+                    <ArrowIcon className={styles.btnIcon} />
+                  </a>
+                  {GESTOR_DEMO_USER && GESTOR_DEMO_PASSWORD ? (
+                    <dl className={styles.demoLogin} aria-label="Acceso a la demo de Gestor">
+                      <div>
+                        <dt>Usuario</dt>
+                        <dd>{GESTOR_DEMO_USER}</dd>
+                      </div>
+                      <div>
+                        <dt>Contraseña</dt>
+                        <dd>{GESTOR_DEMO_PASSWORD}</dd>
+                      </div>
+                    </dl>
+                  ) : null}
+                </div>
               </div>
               <div className={styles.archiveWrap}>
                 <ArchiveSearch />

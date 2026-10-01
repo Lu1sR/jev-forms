@@ -4,6 +4,10 @@
 export const FORMULARIOS_URL =
   process.env.NEXT_PUBLIC_FORMULARIOS_URL || "https://formularios.docutecec.com";
 export const GESTOR_URL = process.env.NEXT_PUBLIC_GESTOR_URL || "https://gestor.docutecec.com";
+// Shared login of the Gestor demo (read-mostly "Demo" group, see gestor/README.md).
+// Shown next to the link only when both are set.
+export const GESTOR_DEMO_USER = process.env.NEXT_PUBLIC_GESTOR_DEMO_USER || "";
+export const GESTOR_DEMO_PASSWORD = process.env.NEXT_PUBLIC_GESTOR_DEMO_PASSWORD || "";
 export const SALES_EMAIL = process.env.NEXT_PUBLIC_SALES_EMAIL || "contacto@docutecec.com";
 
 // Digits only, with country code: 5939XXXXXXXX.

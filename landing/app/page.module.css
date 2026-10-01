@@ -407,6 +407,48 @@
   translate: 3px 0;
 }
 
+/* Gestor demo: the link plus its shared login, set as two filled casilleros. */
+.demoAccess {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.75rem;
+}
+
+.demoLogin {
+  display: flex;
+  margin: 0;
+  border: 1.5px solid var(--spot-rule);
+  background: #fff;
+}
+
+.demoLogin > div {
+  display: grid;
+  align-content: center;
+  padding: 0.5rem 0.875rem 0.5625rem;
+}
+
+.demoLogin > div + div {
+  border-left: 1px solid var(--spot-hair);
+}
+
+.demoLogin dt {
+  color: var(--spot);
+  font-size: var(--step--2);
+  font-weight: 600;
+  font-variation-settings: "wdth" 80;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.demoLogin dd {
+  margin: 0;
+  font-family: var(--font-figure);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  user-select: all;
+}
+
 .points {
   display: grid;
   align-content: start;
