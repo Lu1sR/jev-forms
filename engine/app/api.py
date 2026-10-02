@@ -15,6 +15,7 @@ GET /health
 from __future__ import annotations
 
 import json
+import logging
 import os
 from contextlib import asynccontextmanager
 
@@ -28,6 +29,8 @@ from .pipeline import process
 from .readers.detect import UnsupportedFile
 
 load_env()
+
+log = logging.getLogger("uvicorn.error")
 
 MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_MB", "15")) * 1024 * 1024
 
@@ -86,6 +89,7 @@ def extract(
     except UnsupportedFile as e:
         raise HTTPException(415, str(e)) from e
     except JevError as e:
+        log.error("Jev falló sin respaldo: %s", e)
         raise HTTPException(502, f"Error del matcher: {e}") from e
     if not previews:
         out["document"].pop("previews", None)

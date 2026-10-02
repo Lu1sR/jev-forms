@@ -61,6 +61,7 @@ export async function POST(request: Request) {
     case 400:
       return fail(400, detail ? `Revisa los campos del formulario: ${detail}` : "El formulario tiene un error.");
     default:
+      console.error(`engine /extract ${res.status}: ${detail}`);
       return fail(502, "El lector tuvo un problema con este documento. Intenta otra vez o prueba con otro.");
   }
 }
