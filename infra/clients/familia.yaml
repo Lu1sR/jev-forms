@@ -1,0 +1,39 @@
+# Gestor instance for Luis's family (test client). One file per client; deploy with
+#   npx aws-cdk@2 deploy -c client=familia
+# Secrets are not here: they live in SSM Parameter Store under /gestor/<client>/
+# (scripts/put-secrets.sh).
+
+client: familia
+az: us-east-2a
+
+instance:
+  type: t4g.small          # ARM; t4g.medium if memory alarms fire
+  root_volume_gb: 16       # OS + images + swap
+  data_volume_gb: 20       # Postgres + documents (EBS, kept on stack delete)
+  swap_gb: 4
+
+gestor:
+  domain: docs.luis-dev.com
+  ingress: tunnel          # tunnel | caddy
+  app_title: Gestor
+  admin_user: admin
+  ocr_language: spa+eng
+  date_order: DMY
+  date_parser_languages: es+en
+  search_language: es
+  time_zone: America/Guayaquil
+
+smtp:
+  host: smtp.resend.com
+  port: 587
+  user: resend
+  from: "Gestor <gestor@luis-dev.com>"
+
+backup:
+  time: "03:00"              # local time (gestor.time_zone)
+  snapshot_retention_days: 7 # AWS Backup EBS snapshots
+  s3_noncurrent_days: 30     # how long overwritten/deleted files stay recoverable in S3
+
+alerts:
+  email: ""                  # alarms and budget notices; empty = no notifications
+  monthly_budget_usd: 25

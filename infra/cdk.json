@@ -1,0 +1,13 @@
+{
+  "app": ".venv/bin/python app.py",
+  "watch": {
+    "include": [
+      "app.py",
+      "gestor_infra/**",
+      "clients/**"
+    ]
+  },
+  "context": {
+    "@aws-cdk/aws-iam:minimizePolicies": true
+  }
+}

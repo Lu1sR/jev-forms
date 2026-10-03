@@ -1,0 +1,171 @@
+# Gestor for one client: paperless-ngx (docutecec image) + Postgres + Redis + Tika +
+# Gotenberg, sized to fit a 2 GB VM with swap. The same file runs locally and on EC2;
+# everything that differs lives in .env (see .env.example).
+#
+# Ingress, chosen with a profile:
+#   (none)                 only 127.0.0.1:${GESTOR_LOCAL_PORT}, for local tests or SSM port forwarding
+#   --profile tunnel       Cloudflare Tunnel, no inbound ports open on the host
+#   --profile caddy        Caddy with Let's Encrypt on 80/443, for clients without Cloudflare
+#
+# All state lives under ${DATA_ROOT} (on EC2 the separate encrypted EBS volume), so a
+# snapshot of that volume captures the whole instance.
+
+name: gestor
+
+x-restart: &restart
+  restart: unless-stopped
+
+x-logging: &logging
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  paperless:
+    <<: [*restart, *logging]
+    image: ${GESTOR_IMAGE:-gestor:local}
+    build:
+      context: ..
+    depends_on:
+      db:
+        condition: service_healthy
+      broker:
+        condition: service_started
+      tika:
+        condition: service_started
+      gotenberg:
+        condition: service_started
+    ports:
+      - "127.0.0.1:${GESTOR_LOCAL_PORT:-8000}:8000"
+    volumes:
+      - ${DATA_ROOT:-./data}/paperless/data:/usr/src/paperless/data
+      - ${DATA_ROOT:-./data}/paperless/media:/usr/src/paperless/media
+      - ${DATA_ROOT:-./data}/paperless/consume:/usr/src/paperless/consume
+      - ${DATA_ROOT:-./data}/paperless/export:/usr/src/paperless/export
+    environment:
+      PAPERLESS_DBENGINE: postgresql
+      PAPERLESS_DBHOST: db
+      PAPERLESS_DBNAME: paperless
+      PAPERLESS_DBUSER: paperless
+      PAPERLESS_DBPASS: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      PAPERLESS_REDIS: redis://broker:6379
+      PAPERLESS_SECRET_KEY: ${PAPERLESS_SECRET_KEY:?set PAPERLESS_SECRET_KEY}
+      PAPERLESS_URL: ${PAPERLESS_URL:?set PAPERLESS_URL}
+      # Cloudflare and Caddy both terminate TLS and forward X-Forwarded-Proto.
+      PAPERLESS_PROXY_SSL_HEADER: '["HTTP_X_FORWARDED_PROTO", "https"]'
+      PAPERLESS_ADMIN_USER: ${PAPERLESS_ADMIN_USER:-admin}
+      PAPERLESS_ADMIN_PASSWORD: ${PAPERLESS_ADMIN_PASSWORD:?set PAPERLESS_ADMIN_PASSWORD}
+      PAPERLESS_ADMIN_MAIL: ${PAPERLESS_ADMIN_MAIL:-root@localhost}
+
+      # Branding
+      PAPERLESS_APP_TITLE: ${GESTOR_APP_TITLE:-Gestor}
+      PAPERLESS_APP_LOGO: /logo/docutecec_logo.svg
+
+      # Language and dates (per client)
+      PAPERLESS_OCR_LANGUAGE: ${GESTOR_OCR_LANGUAGE:-spa+eng}
+      PAPERLESS_DATE_ORDER: ${GESTOR_DATE_ORDER:-DMY}
+      PAPERLESS_DATE_PARSER_LANGUAGES: ${GESTOR_DATE_PARSER_LANGUAGES:-es+en}
+      PAPERLESS_SEARCH_LANGUAGE: ${GESTOR_SEARCH_LANGUAGE:-es}
+      PAPERLESS_TIME_ZONE: ${GESTOR_TIME_ZONE:-America/Guayaquil}
+      # PDF/A copy of every document, digital PDFs included.
+      PAPERLESS_ARCHIVE_FILE_GENERATION: always
+
+      # Office documents and .eml
+      PAPERLESS_TIKA_ENABLED: 1
+      PAPERLESS_TIKA_ENDPOINT: http://tika:9998
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://gotenberg:3000
+
+      # Memory: one OCR task at a time and one web worker fit in 2 GB.
+      PAPERLESS_TASK_WORKERS: ${GESTOR_TASK_WORKERS:-1}
+      PAPERLESS_THREADS_PER_WORKER: ${GESTOR_THREADS_PER_WORKER:-1}
+      PAPERLESS_WEBSERVER_WORKERS: ${GESTOR_WEBSERVER_WORKERS:-1}
+
+      # SSRF: webhooks, mail, remote OCR and AI must not reach the host or the VPC
+      # (on EC2 that includes the instance metadata endpoint).
+      PAPERLESS_WEBHOOKS_ALLOW_INTERNAL_REQUESTS: "false"
+      PAPERLESS_EMAIL_ALLOW_INTERNAL_HOSTS: "false"
+      PAPERLESS_REMOTE_OCR_ALLOW_INTERNAL_ENDPOINTS: "false"
+      PAPERLESS_AI_LLM_ALLOW_INTERNAL_ENDPOINTS: "false"
+
+      # Outgoing mail (password reset, send by email). Empty host disables it.
+      PAPERLESS_EMAIL_HOST: ${SMTP_HOST:-}
+      PAPERLESS_EMAIL_PORT: ${SMTP_PORT:-587}
+      PAPERLESS_EMAIL_HOST_USER: ${SMTP_USER:-}
+      PAPERLESS_EMAIL_HOST_PASSWORD: ${SMTP_PASSWORD:-}
+      PAPERLESS_EMAIL_FROM: ${SMTP_FROM:-}
+      PAPERLESS_EMAIL_USE_TLS: ${SMTP_USE_TLS:-true}
+
+  db:
+    <<: [*restart, *logging]
+    image: docker.io/library/postgres:18
+    # Small buffers: the VM has 2 GB shared with OCR, Tika and Gotenberg.
+    command: ["postgres", "-c", "shared_buffers=64MB", "-c", "max_connections=30"]
+    volumes:
+      - ${DATA_ROOT:-./data}/postgres:/var/lib/postgresql
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paperless -d paperless"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  broker:
+    <<: [*restart, *logging]
+    image: docker.io/valkey/valkey:9-alpine
+    command: ["valkey-server", "--maxmemory", "64mb", "--save", "60", "1"]
+    volumes:
+      - ${DATA_ROOT:-./data}/redis:/data
+
+  tika:
+    <<: [*restart, *logging]
+    image: docker.io/apache/tika:3.3.1.0
+    environment:
+      # Applies to the server and to the parsing child it forks.
+      JAVA_TOOL_OPTIONS: ${TIKA_JAVA_OPTS:--Xmx256m -XX:+UseSerialGC}
+    mem_limit: ${TIKA_MEM_LIMIT:-700m}
+
+  gotenberg:
+    <<: [*restart, *logging]
+    image: docker.io/gotenberg/gotenberg:8.37
+    # Chromium converts .eml; no JavaScript or external content (tracking pixels).
+    # Chromium and LibreOffice start on first use and restart after a few
+    # conversions so idle memory stays low.
+    command:
+      - gotenberg
+      - --chromium-disable-javascript=true
+      - --chromium-allow-list=file:///tmp/.*
+      - --chromium-restart-after=5
+      - --libreoffice-restart-after=5
+    mem_limit: ${GOTENBERG_MEM_LIMIT:-700m}
+
+  cloudflared:
+    <<: [*restart, *logging]
+    profiles: [tunnel]
+    image: docker.io/cloudflare/cloudflared:2025.9.1
+    # The tunnel's public hostname (set in Cloudflare Zero Trust) must point to
+    # http://paperless:8000.
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      - paperless
+
+  caddy:
+    <<: [*restart, *logging]
+    profiles: [caddy]
+    image: docker.io/library/caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      GESTOR_DOMAIN: ${GESTOR_DOMAIN:-}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${DATA_ROOT:-./data}/caddy:/data
+    depends_on:
+      - paperless
