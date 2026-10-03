@@ -1,0 +1,9 @@
+# Only used with `--profile caddy` (clients without Cloudflare). Caddy obtains and
+# renews the Let's Encrypt certificate; the domain's A record must point to the host.
+{$GESTOR_DOMAIN} {
+	encode gzip
+	request_body {
+		max_size 200MB
+	}
+	reverse_proxy paperless:8000
+}
