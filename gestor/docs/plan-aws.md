@@ -101,7 +101,9 @@ o exportar y apagar.
       con datos faltantes disparaban RECOVER (reinicio a mitad del arranque) y la política del tema
       SNS impedía publicar a CloudWatch.
 - [ ] Crear los 4 usuarios, tipos de documento (Factura, Recibo, Escritura, …) y vistas.
-- [ ] **Prueba de restauración**: restaurar un respaldo en una VM temporal y verificar.
+- [x] Respaldo manual en la VM → S3 verificado (2026-10-04). Reemplazo de VM probado: la nueva
+      tomó el mismo disco de datos sin formatearlo (usuarios y datos intactos), ~4 min de corte.
+- [ ] **Prueba de restauración** en AWS: restaurar el respaldo de S3 en una VM temporal.
 - [ ] Opcional: Cloudflare Access como segundo login (ojo: bloquea apps móviles de
       paperless salvo con service tokens).
 - [ ] Opcional: regla de correo de paperless para importar facturas electrónicas desde

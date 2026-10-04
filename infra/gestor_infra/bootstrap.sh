@@ -105,6 +105,8 @@ aws ecr get-login-password --region "${REGION}" | docker login --username AWS --
 cd /opt/gestor
 docker compose --profile "${PROFILE}" pull --quiet
 docker compose --profile "${PROFILE}" up -d --remove-orphans
+# Old image versions left by updates fill the 16 GB root disk; keep only those in use.
+docker image prune -af
 SH
 chmod 755 /usr/local/bin/gestor-up
 
