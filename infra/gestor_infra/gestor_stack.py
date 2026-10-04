@@ -304,6 +304,17 @@ class GestorStack(Stack):
 
         # --- alarms and budget ---------------------------------------------------------
         topic = sns.Topic(self, "Alerts", enforce_ssl=True)
+        # enforce_ssl creates a topic policy, which replaces SNS's default one: without
+        # this statement CloudWatch cannot publish and alarms never reach the inbox.
+        topic.add_to_resource_policy(
+            iam.PolicyStatement(
+                sid="AllowCloudWatchAlarms",
+                principals=[iam.ServicePrincipal("cloudwatch.amazonaws.com")],
+                actions=["sns:Publish"],
+                resources=[topic.topic_arn],
+                conditions={"StringEquals": {"aws:SourceAccount": self.account}},
+            )
+        )
         if cfg.alert_email:
             topic.add_subscription(subs.EmailSubscription(cfg.alert_email))
         notify = cw_actions.SnsAction(topic)
@@ -316,7 +327,9 @@ class GestorStack(Stack):
                 threshold=threshold,
                 evaluation_periods=periods,
                 comparison_operator=cw.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
-                treat_missing_data=cw.TreatMissingData.BREACHING,
+                # Missing data is normal right after creation and while the VM boots;
+                # treating it as breaching fired RECOVER on a healthy VM mid-bootstrap.
+                treat_missing_data=cw.TreatMissingData.NOT_BREACHING,
             )
             a.add_alarm_action(notify)
             return a

@@ -94,9 +94,12 @@ o exportar y apagar.
 
 ### Fase 3: puesta en marcha de `docs.luis-dev.com`
 
-- [ ] Tú: crear el túnel en Cloudflare Zero Trust y guardar el token en Parameter Store.
-- [ ] Tú: verificar `luis-dev.com` en Resend (registros DNS en Cloudflare).
-- [ ] `cdk bootstrap` (una vez por proyecto) y `cdk deploy` (con tu aprobación).
+- [x] Tú: crear el túnel en Cloudflare Zero Trust y guardar el token en Parameter Store.
+- [x] Tú: verificar `luis-dev.com` en Resend (registros DNS en Cloudflare).
+- [x] `cdk bootstrap` (una vez por proyecto) y `cdk deploy` (con tu aprobación). Desplegado el
+      2026-10-04; `https://docs.luis-dev.com` responde. Corregidos tras el primer despliegue: alarmas
+      con datos faltantes disparaban RECOVER (reinicio a mitad del arranque) y la política del tema
+      SNS impedía publicar a CloudWatch.
 - [ ] Crear los 4 usuarios, tipos de documento (Factura, Recibo, Escritura, …) y vistas.
 - [ ] **Prueba de restauración**: restaurar un respaldo en una VM temporal y verificar.
 - [ ] Opcional: Cloudflare Access como segundo login (ojo: bloquea apps móviles de

@@ -35,5 +35,5 @@ backup:
   s3_noncurrent_days: 30     # how long overwritten/deleted files stay recoverable in S3
 
 alerts:
-  email: ""                  # alarms and budget notices; empty = no notifications
+  email: luishrt1997@gmail.com # alarms and budget notices; empty = no notifications
   monthly_budget_usd: 25
