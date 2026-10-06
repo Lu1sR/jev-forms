@@ -106,8 +106,11 @@ o exportar y apagar.
 - [ ] **Prueba de restauración** en AWS: restaurar el respaldo de S3 en una VM temporal.
 - [ ] Opcional: Cloudflare Access como segundo login (ojo: bloquea apps móviles de
       paperless salvo con service tokens).
-- [ ] Opcional: regla de correo de paperless para importar facturas electrónicas desde
-      un buzón (el XML del SRI no lo lee paperless; el PDF RIDE sí).
+- [ ] Facturas por correo: `facturas@` (compartidas con `Familia`) y `facturas-luis@` (privadas)
+      → Cloudflare Email Worker `gestor-correo-familia` → API de Gestor, sin buzón IMAP
+      (`infra/email-worker/`). Gestor configurado (usuario `correo`, etiquetas 2 y 3, flujos) y
+      Worker desplegado (2026-10-04). Falta: `FALLBACK_EMAIL`, reglas de Email Routing y prueba
+      real. El XML del SRI se ignora; el PDF RIDE sí entra.
 
 ### Antes de un cliente real
 
