@@ -1,0 +1,22 @@
+# Email Worker for the "familia" Gestor instance. Routing rule (Cloudflare dashboard):
+#   luis-dev.com > Email > Email Routing > each address in ROUTES -> Send to Worker gestor-correo-familia
+# Secrets (never here; the repo is public):
+#   npx wrangler secret put GESTOR_TOKEN      # token of the Gestor user "correo" (add documents only)
+#   npx wrangler secret put ALLOWED_SENDERS   # "a@gmail.com, b@gmail.com, @proveedor.ec"
+#   npx wrangler secret put FALLBACK_EMAIL    # verified Email Routing destination for failed uploads
+name = "gestor-correo-familia"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = false
+
+[vars]
+GESTOR_URL = "https://docs.luis-dev.com"
+# Receiving address -> Gestor tag ids (comma separated). Each tag triggers a Gestor workflow
+# that sets owner and sharing: "Correo-Familia" shared with the Familia group, "Correo-Luis" private.
+ROUTES = '''{
+  "facturas@luis-dev.com": "2",
+  "facturas-luis@luis-dev.com": "3"
+}'''
+
+[observability]
+enabled = true

@@ -11,6 +11,7 @@ gestor_infra/config.py     carga y valida el YAML
 gestor_infra/gestor_stack.py  el stack
 gestor_infra/bootstrap.sh  primer arranque de la VM (user-data)
 scripts/put-secrets.sh     guarda los secretos del cliente en SSM Parameter Store
+email-worker/              Cloudflare Email Worker: facturas@<dominio> → API de Gestor
 ```
 
 ## Qué crea cada stack

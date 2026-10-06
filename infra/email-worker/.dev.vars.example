@@ -1,0 +1,6 @@
+# Local testing only (npx wrangler dev). Copy to .dev.vars.
+GESTOR_URL=http://localhost:9999
+GESTOR_TOKEN=local-test
+ALLOWED_SENDERS=familia@example.com, @proveedor.ec
+FALLBACK_EMAIL=respaldo@example.com
+ROUTES={"facturas@luis-dev.com": "1", "facturas-luis@luis-dev.com": "2"}

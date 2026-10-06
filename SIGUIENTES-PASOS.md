@@ -39,7 +39,7 @@ Pendiente en AWS:
       tratamiento (LOPDP; datos en us-east-2, Ohio) y limitar la política de ejecución de
       CloudFormation del bootstrap de CDK (hoy `AdministratorAccess`).
 - [ ] DMARC de `luis-dev.com` a `p=quarantine` cuando el envío esté estable (hoy `p=none`).
-- [ ] Opcional: importar facturas electrónicas desde un buzón (reglas de correo IMAP).
+- [ ] Facturas por correo con Cloudflare Email Worker (`infra/email-worker/`): desplegar y probar.
 
 ## 3. Formularios: pulir
 
