@@ -226,6 +226,12 @@ class GestorStack(Stack):
             "SMTP_FROM": f'"{cfg.smtp_from}"',
             "BACKUP_S3_URI": f"s3://{backup_bucket.bucket_name}/gestor",
             "BACKUP_LOCAL_DAYS": "3",
+            # flows (n8n); secrets come from SSM, the Google key file is written by gestor-render-env
+            "FORMULARIOS_URL": cfg.formularios_url,
+            "FLOWS_SHEETS_ID": cfg.sheets_id,
+            "FLOWS_SHEETS_TAB": cfg.sheets_tab,
+            "N8N_OWNER_EMAIL": cfg.alert_email if cfg.flows_enabled else "",
+            "N8N_MEM_LIMIT": "900m",
         }
         script = BOOTSTRAP.read_text()
         for key, value in {
@@ -236,7 +242,7 @@ class GestorStack(Stack):
             "DEPLOY_ZIP": deploy_files.s3_object_url,
             "IMAGE_URI": image.image_uri,
             "SWAP_GB": str(cfg.swap_gb),
-            "PROFILE": cfg.ingress,
+            "PROFILES": cfg.compose_profiles,
             "COMPOSE_VERSION": COMPOSE_VERSION,
             "BACKUP_TIME": cfg.backup_time,
             "TIME_ZONE": cfg.time_zone,

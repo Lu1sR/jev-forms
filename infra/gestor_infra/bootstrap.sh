@@ -13,7 +13,7 @@ VOLUME_ID="@@VOLUME_ID@@"
 DEPLOY_ZIP="@@DEPLOY_ZIP@@"
 IMAGE_URI="@@IMAGE_URI@@"
 SWAP_GB="@@SWAP_GB@@"
-PROFILE="@@PROFILE@@"
+PROFILES="@@PROFILES@@"
 COMPOSE_VERSION="@@COMPOSE_VERSION@@"
 export AWS_DEFAULT_REGION="${REGION}"
 
@@ -66,7 +66,7 @@ mkdir -p /data
 uuid="$(blkid -s UUID -o value "${device}")"
 grep -q "${uuid}" /etc/fstab || echo "UUID=${uuid} /data xfs defaults,nofail 0 2" >>/etc/fstab
 mount -a
-mkdir -p /data/paperless/{data,media,consume,export} /data/postgres /data/redis /data/backups
+mkdir -p /data/paperless/{data,media,consume,export} /data/postgres /data/redis /data/backups /data/n8n
 
 # --- compose files and settings ------------------------------------------------
 app=/opt/gestor
@@ -74,7 +74,7 @@ rm -rf "${app}" && mkdir -p "${app}"
 aws s3 cp --only-show-errors "${DEPLOY_ZIP}" /tmp/gestor-deploy.zip
 unzip -q /tmp/gestor-deploy.zip -d "${app}"
 rm /tmp/gestor-deploy.zip
-chmod 755 "${app}/backup.sh"
+chmod 755 "${app}/backup.sh" "${app}/flows/import.sh"
 
 cat >"${app}/instance.env" <<'ENV'
 @@INSTANCE_ENV@@
@@ -83,14 +83,25 @@ ENV
 cat >/usr/local/bin/gestor-render-env <<'SH'
 #!/bin/bash
 # Builds /opt/gestor/.env from instance.env plus the client's SSM SecureString parameters.
+# GOOGLE_SA_JSON (the service-account key, one line) goes to a file instead, referenced
+# as GOOGLE_SA_FILE, because .env cannot hold JSON.
 set -euo pipefail
 cd /opt/gestor
 umask 077
+rm -f google-sa.json
 {
 	cat instance.env
 	aws ssm get-parameters-by-path --path "@@PARAM_PATH@@" --with-decryption \
 		--region "@@REGION@@" --query 'Parameters[].[Name,Value]' --output text |
-		while IFS=$'\t' read -r name value; do echo "${name##*/}=${value}"; done
+		while IFS=$'\t' read -r name value; do
+			key="${name##*/}"
+			if [[ "$key" == "GOOGLE_SA_JSON" ]]; then
+				printf '%s\n' "$value" >google-sa.json
+				echo "GOOGLE_SA_FILE=/opt/gestor/google-sa.json"
+			else
+				echo "${key}=${value}"
+			fi
+		done
 } >.env.new
 mv .env.new .env
 SH
@@ -100,13 +111,23 @@ cat >/usr/local/bin/gestor-up <<SH
 #!/bin/bash
 # Renders .env, logs in to ECR and starts the stack. Runs on every boot.
 set -euo pipefail
+export COMPOSE_PROFILES="${PROFILES}"
 /usr/local/bin/gestor-render-env
 aws ecr get-login-password --region "${REGION}" | docker login --username AWS --password-stdin "${IMAGE_URI%%/*}"
 cd /opt/gestor
-docker compose --profile "${PROFILE}" pull --quiet
-docker compose --profile "${PROFILE}" up -d --remove-orphans
+docker compose pull --quiet
+docker compose up -d --remove-orphans
 # Old image versions left by updates fill the 16 GB root disk; keep only those in use.
 docker image prune -af
+# Flows: load credentials and workflows into n8n once the Paperless service token exists
+# (created by flows/paperless_setup.py and stored in SSM; see flows/README.md).
+if [[ ",\${COMPOSE_PROFILES}," == *,flows,* ]]; then
+	if grep -q '^PAPERLESS_FLOWS_TOKEN=.' .env; then
+		./flows/import.sh || echo "[gestor] flows import failed; run /opt/gestor/flows/import.sh by hand"
+	else
+		echo "[gestor] flows: PAPERLESS_FLOWS_TOKEN not set yet; run flows/paperless_setup.py, store the token in SSM, then gestor-up"
+	fi
+fi
 SH
 chmod 755 /usr/local/bin/gestor-up
 
@@ -122,7 +143,8 @@ Wants=network-online.target
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/usr/local/bin/gestor-up
-ExecStop=/usr/bin/docker compose --project-directory /opt/gestor --profile ${PROFILE} down
+Environment=COMPOSE_PROFILES=${PROFILES}
+ExecStop=/usr/bin/docker compose --project-directory /opt/gestor down
 TimeoutStartSec=900
 TimeoutStopSec=120
 

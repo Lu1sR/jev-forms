@@ -30,4 +30,5 @@ npm run dev          # http://localhost:3000
 | Variable | Por defecto | Qué hace |
 |----------|-------------|----------|
 | `ENGINE_URL` | `http://localhost:8000` | Dónde está el motor (en Railway, su dirección privada) |
+| `ENGINE_API_KEY` | vacío | Clave de la demo, registrada en `ENGINE_API_KEYS` del motor |
 | `NEXT_PUBLIC_CONTACT_URL` | (vacía) | Enlace de "Me interesa" / "Escríbenos"; sin ella no se muestran |

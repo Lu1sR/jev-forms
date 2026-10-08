@@ -41,6 +41,13 @@ pytest
 
 ## API
 
+**Autenticación.** Con `ENGINE_API_KEYS=cliente:clave,otro:clave2` cada llamada a
+`/extract` y `/forms` debe llevar `X-API-Key: <clave>` (o `Authorization: Bearer <clave>`);
+`/health` queda abierto. Cada extracción escribe una línea `extract client=<cliente> status=…
+ms=… file=…` en el log, que es la base para medir uso por cliente. Sin la variable el motor
+acepta todo y lo avisa al arrancar: solo para desarrollo local. Claves: `openssl rand -hex 24`.
+
+
 El formulario lo manda quien llama: el motor lee el documento (factura, nota de
 venta, precuenta…) y llena esos campos.
 

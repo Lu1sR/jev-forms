@@ -1,0 +1,93 @@
+{
+  "id": "sheetsWebhook001",
+  "name": "sheets/webhook · entrada desde Paperless",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "paperless-sheets",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "name": "Webhook Paperless",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "flowsWebhookSec1",
+          "name": "Webhook secret (Paperless → n8n)"
+        }
+      },
+      "webhookId": "paperless-sheets-0001"
+    },
+    {
+      "parameters": {
+        "jsCode": "// El workflow nativo manda {\"doc_id\": N, \"flow\": \"sheets\"}. Solo se usa el id: el flujo relee el documento.\nlet b = $json.body || {};\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { throw new Error('Cuerpo del webhook no es JSON: ' + b.slice(0, 80)); } }\nif (!b.doc_id) throw new Error('Webhook sin doc_id');\nreturn [{ json: { doc_id: Number(b.doc_id) } }];\n"
+      },
+      "name": "doc_id",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "sheetsProcess001",
+          "mode": "id"
+        },
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "name": "Procesar",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        440,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Paperless": {
+      "main": [
+        [
+          {
+            "node": "doc_id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "doc_id": {
+      "main": [
+        [
+          {
+            "node": "Procesar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {},
+  "tags": []
+}

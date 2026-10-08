@@ -6,7 +6,7 @@ Un stack `Gestor-<cliente>` por cliente, en el proyecto `541099636566`, región
 estado en un disco EBS aparte. Plan y decisiones: [`gestor/docs/plan-aws.md`](../gestor/docs/plan-aws.md).
 
 ```
-clients/<cliente>.yaml     configuración del cliente (tamaño, dominio, idiomas, SMTP, respaldos, alertas)
+clients/<cliente>.yaml     configuración del cliente (tamaño, dominio, idiomas, SMTP, respaldos, alertas, flows)
 gestor_infra/config.py     carga y valida el YAML
 gestor_infra/gestor_stack.py  el stack
 gestor_infra/bootstrap.sh  primer arranque de la VM (user-data)
@@ -56,6 +56,24 @@ npx aws-cdk@2 bootstrap aws://541099636566/us-east-2     # una vez por proyecto
 npx aws-cdk@2 diff   -c client=familia
 npx aws-cdk@2 deploy -c client=familia
 ```
+
+### Automatizaciones (flows)
+
+Con `flows.enabled: true` en el YAML la VM arranca también n8n (perfil `flows` del compose;
+detalle en [`gestor/deploy/flows/README.md`](../gestor/deploy/flows/README.md)). Exige
+`t4g.medium`. Pasos extra, una vez por cliente:
+
+1. `put-secrets.sh <cliente>` genera `N8N_DB_PASSWORD`, `N8N_ENCRYPTION_KEY`,
+   `N8N_OWNER_PASSWORD` y `FLOWS_WEBHOOK_SECRET`, y pide `FORMULARIOS_API_KEY` y la clave
+   JSON de la cuenta de servicio de Google (`GOOGLE_SA_JSON`). Déjalo vacío lo que aún no tengas.
+2. Tras el deploy, con Gestor arriba: `python3 gestor/deploy/flows/paperless_setup.py --url https://<dominio> sheets`
+   (contraseña del admin desde SSM; `FLOWS_WEBHOOK_SECRET` desde SSM). Imprime el token
+   del usuario `flujos`: `put-secrets.sh <cliente> --set PAPERLESS_FLOWS_TOKEN`.
+3. En la VM (`aws ssm start-session`): `sudo /usr/local/bin/gestor-up`. Con el token
+   presente importa credenciales y flujos; sin él, lo dice en el log y sigue.
+
+El dueño de n8n es `alerts.email` con `N8N_OWNER_PASSWORD`; el editor se abre con port
+forwarding de SSM al puerto 5678 (nunca por internet).
 
 Contraseña del admin: el comando lo imprime `put-secrets.sh`. Consola de la VM:
 `aws ssm start-session --target <InstanceId>` (salida `Shell` del stack). Log del

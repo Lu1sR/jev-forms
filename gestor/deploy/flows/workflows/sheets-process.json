@@ -1,0 +1,449 @@
+{
+  "id": "sheetsProcess001",
+  "name": "sheets/process · factura → Formularios → Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "name": "Entrada",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "pplGetDocument01",
+          "mode": "id"
+        },
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "name": "Leer documento",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.tag_names.includes('flujo:sheets') && !['flujo:sheets:procesando','flujo:sheets:ok','flujo:sheets:revisar','flujo:sheets:error'].some(t => $json.tag_names.includes(t)) }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "¿Pendiente?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {},
+      "name": "Nada que hacer",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        660,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// La etiqueta \"procesando\" está en has_not_tags del workflow nativo: las escrituras que siguen no lo vuelven a disparar.\nreturn [{ json: { doc_id: $json.id, add_tags: ['flujo:sheets:procesando'] } }];\n"
+      },
+      "name": "Marcar procesando",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "pplWrite00000001",
+          "mode": "id"
+        },
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "name": "Escribir marca",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Recupera el documento y su archivo (la llamada anterior devolvió solo un resumen) y arma el formulario para Formularios.\nconst d = $('Leer documento').first();\nconst form = \"{\\\"title\\\": \\\"Factura\\\", \\\"fields\\\": [{\\\"key\\\": \\\"ruc_emisor\\\", \\\"role\\\": \\\"ruc_emisor\\\"}, {\\\"key\\\": \\\"numero_factura\\\", \\\"role\\\": \\\"numero_factura\\\"}, {\\\"key\\\": \\\"fecha_emision\\\", \\\"role\\\": \\\"fecha_emision\\\"}, {\\\"key\\\": \\\"subtotal\\\", \\\"role\\\": \\\"subtotal\\\"}, {\\\"key\\\": \\\"iva\\\", \\\"role\\\": \\\"iva\\\"}, {\\\"key\\\": \\\"total\\\", \\\"role\\\": \\\"total\\\"}]}\";\nreturn [{ json: { id: d.json.id, title: d.json.title, form }, binary: d.binary }];\n"
+      },
+      "name": "Preparar extracción",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.FORMULARIOS_URL }}/extract",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 180000
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "form",
+              "value": "={{ $json.form }}"
+            }
+          ]
+        }
+      },
+      "name": "Formularios",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1320,
+        -100
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "formulariosKey01",
+          "name": "Formularios API"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Convierte la respuesta de Formularios en campos de Paperless, una fila para Sheets y el estado (ok / revisar).\nconst doc = $('Leer documento').first().json;\nconst res = $input.first().json;\nif (res.error || !Array.isArray(res.fields)) {\n  let err = res.error ? (typeof res.error === 'string' ? res.error : (res.error.message || JSON.stringify(res.error))) : 'respuesta sin campos';\n  err = err.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 300);\n  return [{ json: { ok: false, doc_id: doc.id, error: err } }];\n}\nconst byKey = Object.fromEntries(res.fields.map(f => [f.key, f]));\nconst val = k => (byKey[k] && byKey[k].value != null && byKey[k].value !== '') ? byKey[k].value : null;\nconst names = { ruc_emisor: 'RUC emisor', numero_factura: 'Número de factura', fecha_emision: 'Fecha de emisión',\n  subtotal: 'Subtotal', iva: 'IVA', total: 'Total' };\nconst fields = {};\nfor (const [k, n] of Object.entries(names)) fields[n] = val(k);\nconst clave = res.checks && res.checks.clave_acceso;\nif (clave && clave.value) fields['Clave de acceso'] = clave.value;\nconst dudosos = res.fields.filter(f => f.status !== 'green').map(f => `${f.label}${f.value ? ' = ' + f.value : ' (vacío)'}`);\nconst totals = res.checks && res.checks.totals ? res.checks.totals : {};\nconst estado = (dudosos.length === 0 && totals.ok !== false) ? 'ok' : 'revisar';\nconst row = { 'Documento': doc.id, 'Título': doc.title, 'RUC emisor': val('ruc_emisor'),\n  'Número de factura': val('numero_factura'), 'Fecha de emisión': val('fecha_emision'),\n  'Subtotal': val('subtotal'), 'IVA': val('iva'), 'Total': val('total'), 'Estado': estado,\n  'Enlace': `${$env.PAPERLESS_PUBLIC_URL}/documents/${doc.id}/details`, 'Procesado': new Date().toISOString() };\nreturn [{ json: { ok: true, doc_id: doc.id, estado, fields, dudosos, totals_note: totals.ok === false ? totals.note : null, row } }];\n"
+      },
+      "name": "Interpretar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1540,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.ok === true && !!$env.FLOWS_SHEETS_ID }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "name": "¿Enviar a Sheets?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: $json.row }];"
+      },
+      "name": "Fila",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        -200
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $env.FLOWS_SHEETS_ID }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $env.FLOWS_SHEETS_TAB }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED"
+        }
+      },
+      "name": "Agregar fila",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2200,
+        -200
+      ],
+      "credentials": {
+        "googleApi": {
+          "id": "googleSvcAcct001",
+          "name": "Google (cuenta de servicio)"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Decide la etiqueta final y redacta la nota que queda en el documento.\nconst r = $('Interpretar').first().json;\nconst sheetsRan = $('Agregar fila').isExecuted;\nconst sheetsOut = sheetsRan ? $('Agregar fila').first().json : null;\nconst sheetsErr = sheetsOut && sheetsOut.error ? (typeof sheetsOut.error === 'string' ? sheetsOut.error : (sheetsOut.error.message || JSON.stringify(sheetsOut.error))) : null;\nconst lines = [];\nlet estado;\nif (!r.ok) {\n  estado = 'error';\n  lines.push(`Formularios no pudo leer el documento: ${r.error}`);\n} else {\n  estado = r.estado;\n  if (r.dudosos.length) lines.push('Campos por revisar: ' + r.dudosos.join('; '));\n  if (r.totals_note) lines.push(r.totals_note);\n  if (sheetsRan && !sheetsErr) lines.push(`Fila agregada en Google Sheets (${$env.FLOWS_SHEETS_TAB}).`);\n  if (sheetsErr) { estado = 'error'; lines.push(`No se pudo escribir en Google Sheets: ${sheetsErr}`); }\n  if (!$env.FLOWS_SHEETS_ID) lines.push('Google Sheets no configurado (FLOWS_SHEETS_ID vacío).');\n}\nconst labels = { ok: 'lectura completa', revisar: 'lectura con dudas', error: 'error' };\nreturn [{ json: { doc_id: r.doc_id, add_tags: [`flujo:sheets:${estado}`], remove_tags: ['flujo:sheets:procesando'],\n  fields: r.ok ? r.fields : {}, note: `Flujo sheets: ${labels[estado]}.` + (lines.length ? '\\n' + lines.join('\\n') : '') } }];\n"
+      },
+      "name": "Resultado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "pplWrite00000001",
+          "mode": "id"
+        },
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "name": "Guardar resultado",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        2640,
+        -100
+      ]
+    }
+  ],
+  "connections": {
+    "Entrada": {
+      "main": [
+        [
+          {
+            "node": "Leer documento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer documento": {
+      "main": [
+        [
+          {
+            "node": "¿Pendiente?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Pendiente?": {
+      "main": [
+        [
+          {
+            "node": "Marcar procesando",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Nada que hacer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Marcar procesando": {
+      "main": [
+        [
+          {
+            "node": "Escribir marca",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escribir marca": {
+      "main": [
+        [
+          {
+            "node": "Preparar extracción",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar extracción": {
+      "main": [
+        [
+          {
+            "node": "Formularios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formularios": {
+      "main": [
+        [
+          {
+            "node": "Interpretar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Interpretar": {
+      "main": [
+        [
+          {
+            "node": "¿Enviar a Sheets?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Enviar a Sheets?": {
+      "main": [
+        [
+          {
+            "node": "Fila",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fila": {
+      "main": [
+        [
+          {
+            "node": "Agregar fila",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agregar fila": {
+      "main": [
+        [
+          {
+            "node": "Resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resultado": {
+      "main": [
+        [
+          {
+            "node": "Guardar resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {},
+  "tags": []
+}

@@ -1,4 +1,5 @@
-# Engine API. Private service on Railway: only the web app talks to it.
+# Engine API. On Railway it serves the web demo (private network) and, with a public
+# domain plus ENGINE_API_KEYS, external clients such as Gestor flows.
 FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \

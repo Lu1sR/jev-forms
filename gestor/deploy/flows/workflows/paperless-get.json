@@ -1,0 +1,189 @@
+{
+  "id": "pplGetDocument01",
+  "name": "paperless/get · leer documento y archivo",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "name": "Entrada",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.PAPERLESS_BASE_URL }}/api/documents/{{ $json.doc_id }}/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 60000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json; version=10"
+            }
+          ]
+        }
+      },
+      "name": "Get document",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "paperlessApiTok1",
+          "name": "Paperless API (flujos)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.PAPERLESS_BASE_URL }}/api/tags/?page_size=1000",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 60000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json; version=10"
+            }
+          ]
+        }
+      },
+      "name": "List tags",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "paperlessApiTok1",
+          "name": "Paperless API (flujos)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.PAPERLESS_BASE_URL }}/api/documents/{{ $('Get document').item.json.id }}/download/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 120000,
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json; version=10"
+            }
+          ]
+        }
+      },
+      "name": "Download",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "paperlessApiTok1",
+          "name": "Paperless API (flujos)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Entrada: { doc_id }. Salida: el documento con los nombres de sus etiquetas y el archivo original en binary.data\nconst doc = $('Get document').first().json;\nconst tags = $('List tags').first().json.results || [];\nconst byId = new Map(tags.map(t => [t.id, t.name]));\nconst file = $input.first().binary;\nreturn [{ json: { ...doc, tag_names: (doc.tags || []).map(id => byId.get(id) ?? String(id)) }, binary: file }];\n"
+      },
+      "name": "Documento",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Entrada": {
+      "main": [
+        [
+          {
+            "node": "Get document",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get document": {
+      "main": [
+        [
+          {
+            "node": "List tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List tags": {
+      "main": [
+        [
+          {
+            "node": "Download",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download": {
+      "main": [
+        [
+          {
+            "node": "Documento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {},
+  "tags": []
+}
