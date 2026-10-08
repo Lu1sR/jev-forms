@@ -12,9 +12,19 @@ from .fixtures import make_ride
 def client(monkeypatch):
     monkeypatch.setenv("MATCHER", "heuristic")
     monkeypatch.setenv("OCR_WARMUP", "0")
+    monkeypatch.delenv("ENGINE_API_KEYS", raising=False)
     from app.api import app
     with TestClient(app) as c:
         yield c
+
+
+KEYS = "gestor-familia:clave-familia-0123456789,web-demo:clave-demo-abcdefghijklmn"
+
+
+@pytest.fixture
+def keyed_client(client, monkeypatch):
+    monkeypatch.setenv("ENGINE_API_KEYS", KEYS)
+    return client
 
 
 def post(client, form=None, form_id=None, data=None):
@@ -112,3 +122,39 @@ def test_restaurant_bill_adds_up_with_custom_form_that_forgot_servicio(client):
                               {"key": "pagar", "role": "total"}]})
     assert r.status_code == 200, r.text
     assert r.json()["checks"]["totals"]["ok"] is True
+
+
+def test_without_configured_keys_the_api_is_open(client):
+    assert client.get("/forms").status_code == 200
+
+
+def test_requests_need_a_valid_key_when_keys_are_configured(keyed_client):
+    assert keyed_client.get("/forms").status_code == 401
+    assert keyed_client.get("/forms", headers={"X-API-Key": "nope"}).status_code == 401
+    assert keyed_client.get("/forms", headers={"X-API-Key": "clave-demo-abcdefghijklmn"}).status_code == 200
+    assert keyed_client.get("/forms", headers={"Authorization": "Bearer clave-familia-0123456789"}).status_code == 200
+    assert keyed_client.get("/health").status_code == 200  # monitoring stays open
+    r = keyed_client.post("/extract", data={"form_id": "sorteo"},
+                          files={"file": ("doc.pdf", make_ride(), "application/pdf")})
+    assert r.status_code == 401
+
+
+def test_extract_with_key_logs_the_client(keyed_client, caplog):
+    import logging
+    with caplog.at_level(logging.INFO, logger="jev.usage"):
+        r = keyed_client.post("/extract", data={"form_id": "sorteo"},
+                              headers={"X-API-Key": "clave-familia-0123456789"},
+                              files={"file": ("factura.pdf", make_ride(), "application/pdf")})
+    assert r.status_code == 200, r.text
+    assert any("client=gestor-familia status=200" in m and "file=factura.pdf" in m
+               for m in caplog.messages)
+
+
+def test_bad_key_config_is_rejected():
+    from app.auth import configured_keys
+    assert configured_keys("") == {}
+    assert configured_keys(" a:0123456789abcdef , ") == {"0123456789abcdef": "a"}
+    with pytest.raises(ValueError):
+        configured_keys("sin-dos-puntos")
+    with pytest.raises(ValueError):
+        configured_keys("corta:abc")

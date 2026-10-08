@@ -2,6 +2,8 @@
 // The browser never talks to the engine directly.
 
 const ENGINE_URL = process.env.ENGINE_URL ?? "http://localhost:8000";
+// Key issued to the demo in the engine's ENGINE_API_KEYS; empty while the engine is open.
+const ENGINE_API_KEY = process.env.ENGINE_API_KEY ?? "";
 const TIMEOUT_MS = 60_000;
 
 export const maxDuration = 60;
@@ -32,6 +34,7 @@ export async function POST(request: Request) {
   try {
     res = await fetch(`${ENGINE_URL}/extract`, {
       method: "POST",
+      headers: ENGINE_API_KEY ? { "X-API-Key": ENGINE_API_KEY } : undefined,
       body,
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });

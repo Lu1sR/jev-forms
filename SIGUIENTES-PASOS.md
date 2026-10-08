@@ -40,6 +40,14 @@ Pendiente en AWS:
       CloudFormation del bootstrap de CDK (hoy `AdministratorAccess`).
 - [ ] DMARC de `luis-dev.com` a `p=quarantine` cuando el envío esté estable (hoy `p=none`).
 - [ ] Facturas por correo con Cloudflare Email Worker (`infra/email-worker/`): desplegar y probar.
+- [ ] **Automatizaciones (n8n, `gestor/deploy/flows/`)**: construido y probado en local el
+      2026-10-07 (factura → Formularios → campos en Gestor; Sheets pendiente de credenciales).
+      Para la instancia familiar: exponer el motor en Railway con `ENGINE_API_KEYS` y dominio
+      público; cuenta de servicio de Google y hoja con cabeceras; `put-secrets.sh familia`;
+      `cdk deploy` (pasa a `t4g.medium`); `paperless_setup.py sheets`; token a SSM;
+      `gestor-up`. Diseño en `docs/workflows-exploration.md`.
+- [ ] Licencia de n8n: escribir a license@n8n.io describiendo el modelo antes del primer
+      cliente de pago.
 
 ## 3. Formularios: pulir
 

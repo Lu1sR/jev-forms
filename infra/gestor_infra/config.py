@@ -37,6 +37,10 @@ class ClientConfig:
     s3_noncurrent_days: int
     alert_email: str
     monthly_budget_usd: int
+    flows_enabled: bool
+    formularios_url: str
+    sheets_id: str
+    sheets_tab: str
 
     @property
     def param_path(self) -> str:
@@ -56,6 +60,7 @@ class ClientConfig:
 
         inst, ges, smtp = raw["instance"], raw["gestor"], raw.get("smtp") or {}
         backup, alerts = raw.get("backup") or {}, raw.get("alerts") or {}
+        flows = raw.get("flows") or {}
         cfg = cls(
             client=client,
             az=raw["az"],
@@ -81,6 +86,10 @@ class ClientConfig:
             s3_noncurrent_days=int(backup.get("s3_noncurrent_days", 30)),
             alert_email=alerts.get("email", "") or "",
             monthly_budget_usd=int(alerts.get("monthly_budget_usd", 25)),
+            flows_enabled=bool(flows.get("enabled", False)),
+            formularios_url=flows.get("formularios_url", "") or "",
+            sheets_id=str(flows.get("sheets_id", "") or ""),
+            sheets_tab=flows.get("sheets_tab", "Facturas") or "Facturas",
         )
         if cfg.ingress not in ("tunnel", "caddy"):
             raise ValueError("gestor.ingress must be 'tunnel' or 'caddy'")
@@ -88,4 +97,13 @@ class ClientConfig:
             raise ValueError("instance.type must be ARM (Graviton): the image is built for arm64")
         if not re.fullmatch(r"\d{2}:\d{2}", cfg.backup_time):
             raise ValueError("backup.time must be HH:MM")
+        if cfg.flows_enabled and cfg.instance_type in ("t4g.nano", "t4g.micro", "t4g.small"):
+            raise ValueError("flows need a 4 GB VM: use t4g.medium or bigger")
+        if cfg.flows_enabled and not cfg.alert_email:
+            raise ValueError("flows need alerts.email: it becomes the n8n owner account")
         return cfg
+
+    @property
+    def compose_profiles(self) -> str:
+        """Value for COMPOSE_PROFILES on the VM."""
+        return ",".join([self.ingress] + (["flows"] if self.flows_enabled else []))

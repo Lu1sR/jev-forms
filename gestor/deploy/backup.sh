@@ -2,6 +2,7 @@
 # Daily backup of one Gestor instance. Run from this folder (cron/systemd on EC2).
 #
 #   1. pg_dump of the database      -> DATA_ROOT/backups/db/<timestamp>.sql.gz
+#      (plus <timestamp>.n8n.sql.gz when the flows profile created the n8n database)
 #   2. document_exporter (documents, archive PDF/A, metadata, users, settings)
 #                                   -> DATA_ROOT/paperless/export (incremental)
 #   3. with BACKUP_S3_URI set: upload the dump and sync the export to S3. The bucket
@@ -30,6 +31,14 @@ compose exec -T db pg_dump -U paperless -d paperless --format=plain --no-owner \
 	| gzip -9 >"${db_dir}/${stamp}.sql.gz.part"
 mv "${db_dir}/${stamp}.sql.gz.part" "${db_dir}/${stamp}.sql.gz"
 
+# n8n (flows profile): workflows, credentials (encrypted) and recent executions.
+if compose exec -T db psql -U paperless -d paperless -tAc "SELECT 1 FROM pg_database WHERE datname='n8n'" | grep -q 1; then
+	log "pg_dump n8n"
+	compose exec -T db pg_dump -U paperless -d n8n --format=plain --no-owner \
+		| gzip -9 >"${db_dir}/${stamp}.n8n.sql.gz.part"
+	mv "${db_dir}/${stamp}.n8n.sql.gz.part" "${db_dir}/${stamp}.n8n.sql.gz"
+fi
+
 log "document_exporter"
 # -c: only copy files whose checksum changed; -d: drop files no longer in paperless.
 compose exec -T paperless document_exporter ../export -c -d --no-progress-bar
@@ -37,6 +46,7 @@ compose exec -T paperless document_exporter ../export -c -d --no-progress-bar
 if [[ -n "${BACKUP_S3_URI:-}" ]]; then
 	log "upload to ${BACKUP_S3_URI}"
 	aws s3 cp --only-show-errors "${db_dir}/${stamp}.sql.gz" "${BACKUP_S3_URI%/}/db/${stamp}.sql.gz"
+	[[ -f "${db_dir}/${stamp}.n8n.sql.gz" ]] && aws s3 cp --only-show-errors "${db_dir}/${stamp}.n8n.sql.gz" "${BACKUP_S3_URI%/}/db/${stamp}.n8n.sql.gz"
 	aws s3 sync --only-show-errors --delete "${DATA_ROOT}/paperless/export/" "${BACKUP_S3_URI%/}/export/"
 fi
 

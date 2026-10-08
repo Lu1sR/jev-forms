@@ -15,11 +15,14 @@ GET /health
 from __future__ import annotations
 
 import json
+import logging
 import os
+import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, HTTPException, UploadFile
 
+from .auth import log_startup_state, require_api_key
 from .env import load_env
 from .forms import FormError, form_from_dict, list_forms, load_form
 from .matchers import get_matcher
@@ -29,11 +32,17 @@ from .readers.detect import UnsupportedFile
 
 load_env()
 
+# uvicorn configures only its own loggers; give the app's loggers a handler so the
+# usage and auth lines reach the container log.
+logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO"), format="%(levelname)s: [%(name)s] %(message)s")
+usage_log = logging.getLogger("jev.usage")
+
 MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_MB", "15")) * 1024 * 1024
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    log_startup_state()
     # Load the OCR model at startup so the first request is not slow.
     if os.getenv("OCR_WARMUP", "1") == "1":
         from .readers.ocr import warmup
@@ -50,7 +59,7 @@ def health() -> dict:
 
 
 @app.get("/forms")
-def forms() -> list[dict]:
+def forms(client: str = Depends(require_api_key)) -> list[dict]:
     return [f.to_dict() for f in list_forms()]
 
 
@@ -60,8 +69,27 @@ def extract(
     form: str | None = Form(None),
     form_id: str | None = Form(None),
     previews: bool = Form(False),
+    client: str = Depends(require_api_key),
 ) -> dict:
     # Plain `def`: FastAPI runs it in a thread pool, so OCR doesn't block the loop.
+    started = time.monotonic()
+    status = 500
+    try:
+        out = _extract(file, form, form_id, previews)
+        status = 200
+        return out
+    except HTTPException as e:
+        status = e.status_code
+        raise
+    finally:
+        # One line per document: what each client is charged for.
+        usage_log.info(
+            "extract client=%s status=%s ms=%d file=%s",
+            client, status, (time.monotonic() - started) * 1000, file.filename,
+        )
+
+
+def _extract(file: UploadFile, form: str | None, form_id: str | None, previews: bool) -> dict:
     if form:
         try:
             form_def = form_from_dict(json.loads(form))

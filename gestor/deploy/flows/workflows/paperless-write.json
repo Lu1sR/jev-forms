@@ -1,0 +1,210 @@
+{
+  "id": "pplWrite00000001",
+  "name": "paperless/write · etiquetas, campos y nota",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "name": "Entrada",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.PAPERLESS_BASE_URL }}/api/tags/?page_size=1000",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 60000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json; version=10"
+            }
+          ]
+        }
+      },
+      "name": "List tags",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "paperlessApiTok1",
+          "name": "Paperless API (flujos)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.PAPERLESS_BASE_URL }}/api/custom_fields/?page_size=1000",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 60000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json; version=10"
+            }
+          ]
+        }
+      },
+      "name": "List custom fields",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "paperlessApiTok1",
+          "name": "Paperless API (flujos)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Entrada: { doc_id, add_tags?: [nombres], remove_tags?: [nombres], fields?: {nombre: valor}, note?: texto }\n// Salida: una petición HTTP por operación, siempre por bulk_edit (toca solo lo indicado) y notes.\nconst req = $('Entrada').first().json;\nconst base = $env.PAPERLESS_BASE_URL;\nconst tags = $('List tags').first().json.results || [];\nconst fields = $('List custom fields').first().json.results || [];\nconst find = (list, kind, n) => {\n  const x = list.find(o => o.name.toLowerCase() === String(n).toLowerCase());\n  if (!x) throw new Error(`${kind} no existe en Paperless: ${n} (correr paperless_setup.py)`);\n  return x;\n};\nconst docId = Number(req.doc_id);\nif (!docId) throw new Error('doc_id requerido');\nconst bulk = (method, parameters) => ({ json: { method: 'POST', url: `${base}/api/documents/bulk_edit/`,\n  body: { documents: [docId], method, parameters } } });\nconst out = [];\nconst add = (req.add_tags || []).map(n => find(tags, 'Etiqueta', n).id);\nconst remove = (req.remove_tags || []).map(n => find(tags, 'Etiqueta', n).id);\n// Etiquetas primero: la de estado evita que las escrituras siguientes vuelvan a disparar el workflow nativo.\nif (add.length || remove.length) out.push(bulk('modify_tags', { add_tags: add, remove_tags: remove }));\nconst values = {};\nfor (const [name, raw] of Object.entries(req.fields || {})) {\n  if (raw === null || raw === undefined || raw === '') continue;\n  const f = find(fields, 'Campo', name);\n  let value = raw;\n  if (f.data_type === 'monetary') {\n    const cur = (f.extra_data && f.extra_data.default_currency) || 'USD';\n    const num = typeof raw === 'number' ? raw : Number(String(raw).replace(/[^0-9.,-]/g, '').replace(',', '.'));\n    value = /^[A-Z]{3}/.test(String(raw)) ? String(raw) : (isNaN(num) ? null : cur + num.toFixed(2));\n  } else if (f.data_type === 'string') {\n    value = String(raw).slice(0, 128);\n  } else if (f.data_type === 'integer') {\n    value = parseInt(raw, 10);\n  }\n  if (value !== null && !(typeof value === 'number' && isNaN(value))) values[f.id] = value;\n}\nif (Object.keys(values).length) out.push(bulk('modify_custom_fields', { add_custom_fields: values, remove_custom_fields: [] }));\nif (req.note) out.push({ json: { method: 'POST', url: `${base}/api/documents/${docId}/notes/`, body: { note: String(req.note) } } });\nreturn out;\n"
+      },
+      "name": "Plan",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "={{ $json.method }}",
+        "url": "={{ $json.url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 60000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json; version=10"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}"
+      },
+      "name": "Execute",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "paperlessApiTok1",
+          "name": "Paperless API (flujos)"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const req = $('Entrada').first().json;\nreturn [{ json: { doc_id: req.doc_id, requests: $('Plan').all().length } }];\n"
+      },
+      "name": "Resumen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Entrada": {
+      "main": [
+        [
+          {
+            "node": "List tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List tags": {
+      "main": [
+        [
+          {
+            "node": "List custom fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List custom fields": {
+      "main": [
+        [
+          {
+            "node": "Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan": {
+      "main": [
+        [
+          {
+            "node": "Execute",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute": {
+      "main": [
+        [
+          {
+            "node": "Resumen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {},
+  "tags": []
+}

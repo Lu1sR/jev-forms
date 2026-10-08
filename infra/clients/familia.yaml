@@ -7,7 +7,7 @@ client: familia
 az: us-east-2a
 
 instance:
-  type: t4g.small          # ARM; t4g.medium if memory alarms fire
+  type: t4g.medium         # ARM; 4 GB: paperless + n8n (flows). t4g.small without flows
   root_volume_gb: 16       # OS + images + swap
   data_volume_gb: 20       # Postgres + documents (EBS, kept on stack delete)
   swap_gb: 4
@@ -37,3 +37,11 @@ backup:
 alerts:
   email: luishrt1997@gmail.com # alarms and budget notices; empty = no notifications
   monthly_budget_usd: 25
+
+# Automations (n8n next to paperless; gestor/deploy/flows/README.md). Secrets in SSM:
+# N8N_*, FLOWS_WEBHOOK_SECRET, FORMULARIOS_API_KEY, PAPERLESS_FLOWS_TOKEN, GOOGLE_SA_JSON.
+flows:
+  enabled: true
+  formularios_url: https://formularios-api.docutecec.com   # public URL of the engine
+  sheets_id: "1KD02mdX0sNfq5DnDXz14Y93bxkH6NdGK-oWxpkcNUUY"   # spreadsheet id of the "sheets" flow
+  sheets_tab: Facturas

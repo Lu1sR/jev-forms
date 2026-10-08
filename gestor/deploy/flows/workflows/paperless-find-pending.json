@@ -1,0 +1,162 @@
+{
+  "id": "pplFindPending01",
+  "name": "paperless/find-pending · documentos por procesar",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "name": "Entrada",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.PAPERLESS_BASE_URL }}/api/tags/?page_size=1000",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 60000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json; version=10"
+            }
+          ]
+        }
+      },
+      "name": "List tags",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "paperlessApiTok1",
+          "name": "Paperless API (flujos)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Entrada: { entry_tag, exclude_tags: [nombres], stale_tag?: nombre, stale_minutes?: n }\nconst req = $('Entrada').first().json;\nconst tags = $input.first().json.results || [];\nconst id = n => { const t = tags.find(t => t.name.toLowerCase() === String(n).toLowerCase());\n  if (!t) throw new Error(`Etiqueta no existe en Paperless: ${n}`); return t.id; };\nconst none = (req.exclude_tags || []).map(id);\nlet url = `${$env.PAPERLESS_BASE_URL}/api/documents/?tags__id__all=${id(req.entry_tag)}&fields=id,modified,tags&page_size=100&ordering=modified`;\nif (none.length) url += `&tags__id__none=${none.join(',')}`;\nreturn [{ json: { url, stale_tag_id: req.stale_tag ? id(req.stale_tag) : null, stale_minutes: Number(req.stale_minutes || 30) } }];\n"
+      },
+      "name": "Query",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 60000
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json; version=10"
+            }
+          ]
+        }
+      },
+      "name": "List documents",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "paperlessApiTok1",
+          "name": "Paperless API (flujos)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Documentos con la etiqueta de entrada y sin las de salida. Los marcados \"en proceso\" solo\n// cuentan si llevan más de stale_minutes sin cambios (una ejecución que murió a medias).\nconst q = $('Query').first().json;\nconst docs = $input.first().json.results || [];\nconst cutoff = Date.now() - q.stale_minutes * 60000;\nreturn docs\n  .filter(d => !q.stale_tag_id || !(d.tags || []).includes(q.stale_tag_id) || new Date(d.modified).getTime() < cutoff)\n  .map(d => ({ json: { doc_id: d.id } }));\n"
+      },
+      "name": "Pending",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Entrada": {
+      "main": [
+        [
+          {
+            "node": "List tags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List tags": {
+      "main": [
+        [
+          {
+            "node": "Query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query": {
+      "main": [
+        [
+          {
+            "node": "List documents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List documents": {
+      "main": [
+        [
+          {
+            "node": "Pending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "pinData": {},
+  "tags": []
+}
