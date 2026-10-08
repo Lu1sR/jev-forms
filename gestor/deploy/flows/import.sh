@@ -23,11 +23,16 @@ need() { local v; v="$(env_get "$1")"; [[ -n "$v" ]] || { echo "set $1 in $env_f
 log() { echo "[flows] $*"; }
 n8n() { "${compose[@]}" exec -T -u node n8n n8n "$@"; }
 wait_healthy() {
-	for _ in $(seq 1 45); do
-		"${compose[@]}" exec -T n8n wget -qO- http://localhost:5678/healthz >/dev/null 2>&1 && return 0
-		sleep 2
+	# /healthz answers while n8n is still booting; /healthz/readiness and /rest/settings
+	# only once the database is connected and the routes are registered.
+	for _ in $(seq 1 60); do
+		if "${compose[@]}" exec -T n8n wget -qO- http://localhost:5678/healthz/readiness >/dev/null 2>&1 &&
+			"${compose[@]}" exec -T n8n wget -qO- http://localhost:5678/rest/settings >/dev/null 2>&1; then
+			return 0
+		fi
+		sleep 3
 	done
-	echo "n8n did not become healthy"; exit 1
+	echo "n8n did not become ready"; exit 1
 }
 
 wait_healthy
