@@ -3,9 +3,11 @@
 service user n8n authenticates as, and the native workflow that calls n8n.
 
     python3 paperless_setup.py --url http://localhost:8000 --user admin sheets
+    python3 paperless_setup.py --url ... sheets --name sheets-luis      # same YAML, second instance
     PAPERLESS_PASSWORD=... FLOWS_WEBHOOK_SECRET=... python3 paperless_setup.py ...
 
-Reads paperless/<flow>.yaml. Idempotent: objects are matched by name and updated, so it
+Reads paperless/<flow>.yaml; "{{flow}}" inside it becomes the flow name (--name, default
+the file name), so one YAML can be applied several times with different tags and sheets. Idempotent: objects are matched by name and updated, so it
 can be re-run after editing the YAML or on a restored instance. Only the standard
 library is needed (the EC2 VM has no pip packages). The service user's API token is
 printed once, the first time the user is created; later runs keep the existing token.
@@ -16,6 +18,7 @@ import argparse
 import getpass
 import json
 import os
+import re
 import secrets
 import sys
 import urllib.error
@@ -83,12 +86,12 @@ class Api:
         return obj
 
 
-def load_yaml(path: Path) -> dict:
+def load_yaml_text(text: str) -> dict:
     try:
         import yaml  # type: ignore
     except ImportError:
-        return _mini_yaml(path.read_text(encoding="utf-8"))
-    return yaml.safe_load(path.read_text(encoding="utf-8"))
+        return _mini_yaml(text)
+    return yaml.safe_load(text)
 
 
 def _mini_yaml(text: str) -> dict:
@@ -297,6 +300,7 @@ def _token(base: str, username: str, password: str) -> str:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("flow", help="name of paperless/<flow>.yaml")
+    ap.add_argument("--name", help="flow instance name used in tags and the webhook (default: same as the file)")
     ap.add_argument("--url", default=os.getenv("PAPERLESS_URL", "http://localhost:8000"))
     ap.add_argument("--user", default=os.getenv("PAPERLESS_ADMIN_USER", "admin"),
                     help="admin user (password from PAPERLESS_PASSWORD or prompted)")
@@ -306,7 +310,10 @@ def main() -> None:
     spec_path = HERE / "paperless" / f"{args.flow}.yaml"
     if not spec_path.exists():
         sys.exit(f"no such flow: {spec_path}")
-    spec = load_yaml(spec_path)
+    name = args.name or args.flow
+    if not re.fullmatch(r"[a-z0-9-]+", name):
+        sys.exit("--name must be lowercase letters, digits or '-'")
+    spec = load_yaml_text(spec_path.read_text(encoding="utf-8").replace("{{flow}}", name))
 
     if args.token:
         auth = f"Token {args.token}"
@@ -314,7 +321,7 @@ def main() -> None:
         password = os.getenv("PAPERLESS_PASSWORD") or getpass.getpass(f"password for {args.user}: ")
         auth = "Token " + _token(args.url, args.user, password)
     api = Api(args.url, auth)
-    print(f"flow {args.flow!r} on {args.url}")
+    print(f"flow {name!r} (from {spec_path.name}) on {args.url}")
     apply(api, spec, os.getenv("FLOWS_WEBHOOK_SECRET"))
     print("done")
 

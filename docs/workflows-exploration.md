@@ -530,7 +530,11 @@ Construido en la rama `claude/gestor-flows` y probado en local con la imagen
   invisibles para otros usuarios (se crean sin dueño); un `body` de texto con `as_json`
   llega como *cadena* JSON (se usan `params`); la CLI de n8n escribe en la base y el servidor
   solo registra webhooks al arrancar (`import.sh` reinicia n8n).
-- Pendiente de probar con credenciales reales: la escritura en Google Sheets.
+- 2026-10-08: en producción (familia) de punta a punta, incluida la fila en Google Sheets.
+  El motor quedó público en `formularios-api.docutecec.com` con claves por cliente. La
+  VM sigue en `t4g.small` porque el plan gratuito no permite `t4g.medium`. El flujo
+  admite varias hojas: una instancia por nombre (`sheets`, `sheets-luis`) con sus
+  etiquetas y su hoja en `FLOWS_SHEETS_TARGETS`; `Correo-Familia` alimenta `sheets`.
 
 ## 10. Plan original de prueba de concepto (pasos pequeños)
 

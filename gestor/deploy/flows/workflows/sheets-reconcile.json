@@ -23,7 +23,7 @@
     },
     {
       "parameters": {
-        "jsCode": "return [{ json: { entry_tag: 'flujo:sheets',\n  exclude_tags: ['flujo:sheets:ok', 'flujo:sheets:revisar', 'flujo:sheets:error'],\n  stale_tag: 'flujo:sheets:procesando', stale_minutes: 30 } }];\n"
+        "jsCode": "// Un ítem por flujo configurado en FLOWS_SHEETS_TARGETS (siempre al menos \"sheets\").\nlet targets = {};\ntry { targets = JSON.parse($env.FLOWS_SHEETS_TARGETS || '{}'); } catch (e) {}\nconst flows = Object.keys(targets).length ? Object.keys(targets) : ['sheets'];\nreturn flows.map(flow => ({ json: { flow, entry_tag: `flujo:${flow}`,\n  exclude_tags: [`flujo:${flow}:ok`, `flujo:${flow}:revisar`, `flujo:${flow}:error`],\n  stale_tag: `flujo:${flow}:procesando`, stale_minutes: 30 } }));\n"
       },
       "name": "Parámetros",
       "type": "n8n-nodes-base.code",
@@ -40,7 +40,7 @@
           "value": "pplFindPending01",
           "mode": "id"
         },
-        "mode": "once",
+        "mode": "each",
         "options": {
           "waitForSubWorkflow": true
         }

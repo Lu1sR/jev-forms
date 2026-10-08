@@ -53,8 +53,8 @@ escrituras quedan en el historial del documento con el usuario `flujos`.
    `N8N_ENCRYPTION_KEY`, `FLOWS_WEBHOOK_SECRET`; más `N8N_OWNER_EMAIL` /
    `N8N_OWNER_PASSWORD` (cuenta con la que entras al editor), `FORMULARIOS_URL` /
    `FORMULARIOS_API_KEY` (clave de este cliente en `ENGINE_API_KEYS` del motor) y, para
-   Sheets, `FLOWS_SHEETS_ID`, `FLOWS_SHEETS_TAB` y `GOOGLE_SA_FILE` (clave JSON de una
-   cuenta de servicio con la hoja compartida como editor).
+   Sheets, `FLOWS_SHEETS_TARGETS` y `GOOGLE_SA_FILE` (clave JSON de una cuenta de
+   servicio con cada hoja compartida como editor).
 2. **Arrancar**: `docker compose --profile flows up -d` (en EC2 lo hace `gestor-up`).
    `flows-init` crea la base `n8n` en el Postgres compartido.
 3. **Preparar Paperless** (desde cualquier máquina que llegue a la instancia):
@@ -72,6 +72,22 @@ escrituras quedan en el historial del documento con el usuario `flujos`.
 Hoja de cálculo: la pestaña debe tener en la fila 1 estas cabeceras: `Documento`,
 `Título`, `RUC emisor`, `Número de factura`, `Fecha de emisión`, `Subtotal`, `IVA`,
 `Total`, `Estado`, `Enlace`, `Procesado`.
+
+### Varias hojas (una instancia del flujo por hoja)
+
+El mismo flujo sirve varias hojas. Cada instancia tiene su nombre, sus etiquetas
+`flujo:<nombre>[:estado]` y su hoja en `FLOWS_SHEETS_TARGETS` (en EC2 sale de
+`flows.sheets` del YAML del cliente):
+
+```bash
+FLOWS_SHEETS_TARGETS='{"sheets": {"id": "<hoja familia>", "tab": "Facturas"}, "sheets-luis": {"id": "<hoja Luis>", "tab": "Facturas"}}'
+python3 flows/paperless_setup.py --url https://docs.ejemplo.com sheets --name sheets-luis
+```
+
+El webhook nativo manda `{"doc_id": N, "flow": "sheets-luis"}`; n8n elige etiquetas y
+hoja por ese nombre, y la reconciliación recorre todas las instancias del mapa. Para que
+una regla de correo alimente una instancia, su workflow nativo (`Facturas de Luis`) añade
+la etiqueta de entrada `flujo:sheets-luis`.
 
 ## Editar un flujo
 

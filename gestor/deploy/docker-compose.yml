@@ -228,8 +228,8 @@ services:
       PAPERLESS_BASE_URL: http://paperless:8000
       PAPERLESS_PUBLIC_URL: ${PAPERLESS_URL:?set PAPERLESS_URL}
       FORMULARIOS_URL: ${FORMULARIOS_URL:-}
-      FLOWS_SHEETS_ID: ${FLOWS_SHEETS_ID:-}
-      FLOWS_SHEETS_TAB: ${FLOWS_SHEETS_TAB:-Facturas}
+      # JSON: {"<flujo>": {"id": "<spreadsheet id>", "tab": "<pestaña>"}}; one entry per sheets flow
+      FLOWS_SHEETS_TARGETS: ${FLOWS_SHEETS_TARGETS:-{}}
     mem_limit: ${N8N_MEM_LIMIT:-700m}
 
   cloudflared:

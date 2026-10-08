@@ -1,19 +1,20 @@
-# Flow "sheets": invoices tagged flujo:sheets are read by Formularios; the fields land
+# Flow "sheets": invoices tagged flujo:{{flow}} are read by Formularios; the fields land
 # in Paperless custom fields and one row per invoice goes to a Google Sheet.
 # Applied with: python3 paperless_setup.py --url <paperless> --user admin sheets
-# (idempotent: existing objects are matched by name and updated).
+# (idempotent: existing objects are matched by name and updated). "{{flow}}" is the
+# instance name (--name): the same YAML serves several sheets, e.g. --name sheets-luis.
 flow: sheets
 
 tags:
-  - name: flujo:sheets            # entry: a person (or a mail rule) adds it
+  - name: flujo:{{flow}}            # entry: a person (or a mail rule) adds it
     color: "#1f6feb"
-  - name: flujo:sheets:procesando # set by n8n while it works, so its own writes do not re-trigger
+  - name: flujo:{{flow}}:procesando # set by n8n while it works, so its own writes do not re-trigger
     color: "#8b949e"
-  - name: flujo:sheets:ok         # exit: fields filled, row written
+  - name: flujo:{{flow}}:ok         # exit: fields filled, row written
     color: "#2da44e"
-  - name: flujo:sheets:revisar    # exit: some field is doubtful; a person checks
+  - name: flujo:{{flow}}:revisar    # exit: some field is doubtful; a person checks
     color: "#d4a72c"
-  - name: flujo:sheets:error      # exit: the flow failed after retries; see the note
+  - name: flujo:{{flow}}:error      # exit: the flow failed after retries; see the note
     color: "#cf222e"
 
 custom_fields:
@@ -39,29 +40,29 @@ service_user:
     - documents.delete_note
 
 saved_views:
-  - name: "Facturas por revisar (Sheets)"
+  - name: "Facturas por revisar ({{flow}})"
     show_on_dashboard: true
     show_in_sidebar: true
-    tags_all: [flujo:sheets:revisar]
-  - name: "Facturas en Sheets"
+    tags_all: [flujo:{{flow}}:revisar]
+  - name: "Facturas en {{flow}}"
     show_in_sidebar: true
-    tags_all: [flujo:sheets:ok]
+    tags_all: [flujo:{{flow}}:ok]
 
 # Native workflow: whenever a document gains flujo:sheets (on add or on edit) and has
 # none of the exit tags, give the service user edit rights and call n8n.
 workflow:
-  name: "Flujo sheets → n8n"
+  name: "Flujo {{flow}} → n8n"
   triggers:
     - type: document_added
-      has_tags: [flujo:sheets]
-      has_not_tags: [flujo:sheets:procesando, flujo:sheets:ok, flujo:sheets:revisar, flujo:sheets:error]
+      has_tags: [flujo:{{flow}}]
+      has_not_tags: [flujo:{{flow}}:procesando, flujo:{{flow}}:ok, flujo:{{flow}}:revisar, flujo:{{flow}}:error]
     - type: document_updated
-      has_tags: [flujo:sheets]
-      has_not_tags: [flujo:sheets:procesando, flujo:sheets:ok, flujo:sheets:revisar, flujo:sheets:error]
+      has_tags: [flujo:{{flow}}]
+      has_not_tags: [flujo:{{flow}}:procesando, flujo:{{flow}}:ok, flujo:{{flow}}:revisar, flujo:{{flow}}:error]
   actions:
     - type: assignment
       change_users: [flujos]
     - type: webhook
       url: http://n8n:5678/webhook/paperless-sheets
-      params: { doc_id: "{{doc_id}}", flow: sheets }   # sent as a JSON object
+      params: { doc_id: "{{doc_id}}", flow: "{{flow}}" }   # sent as a JSON object
       secret_header: X-Flows-Secret       # value: FLOWS_WEBHOOK_SECRET
