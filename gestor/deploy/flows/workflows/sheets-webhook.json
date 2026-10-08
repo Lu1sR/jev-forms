@@ -27,7 +27,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// El workflow nativo manda {\"doc_id\": N, \"flow\": \"sheets\"}. Solo se usa el id: el flujo relee el documento.\nlet b = $json.body || {};\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { throw new Error('Cuerpo del webhook no es JSON: ' + b.slice(0, 80)); } }\nif (!b.doc_id) throw new Error('Webhook sin doc_id');\nreturn [{ json: { doc_id: Number(b.doc_id) } }];\n"
+        "jsCode": "// El workflow nativo manda {\"doc_id\": N, \"flow\": \"sheets\"}. Solo se usa el id: el flujo relee el documento.\nlet b = $json.body || {};\nif (typeof b === 'string') { try { b = JSON.parse(b); } catch (e) { throw new Error('Cuerpo del webhook no es JSON: ' + b.slice(0, 80)); } }\nif (!b.doc_id) throw new Error('Webhook sin doc_id');\nreturn [{ json: { doc_id: Number(b.doc_id), flow: String(b.flow || 'sheets') } }];\n"
       },
       "name": "doc_id",
       "type": "n8n-nodes-base.code",

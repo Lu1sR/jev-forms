@@ -7,6 +7,8 @@ the VM; the new one attaches the same data volume once the old one is gone.
 
 from __future__ import annotations
 
+import json
+
 from pathlib import Path
 
 from aws_cdk import (
@@ -228,8 +230,8 @@ class GestorStack(Stack):
             "BACKUP_LOCAL_DAYS": "3",
             # flows (n8n); secrets come from SSM, the Google key file is written by gestor-render-env
             "FORMULARIOS_URL": cfg.formularios_url,
-            "FLOWS_SHEETS_ID": cfg.sheets_id,
-            "FLOWS_SHEETS_TAB": cfg.sheets_tab,
+            # single-quoted so compose keeps the JSON literally
+            "FLOWS_SHEETS_TARGETS": "'" + json.dumps(cfg.sheets_targets, separators=(",", ":")) + "'",
             "N8N_OWNER_EMAIL": cfg.alert_email if cfg.flows_enabled else "",
             # On a 2 GB VM n8n must stay small (the 4 GB swap absorbs OCR peaks).
             "N8N_MEM_LIMIT": "450m" if cfg.small_vm else "900m",

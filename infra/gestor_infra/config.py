@@ -39,8 +39,7 @@ class ClientConfig:
     monthly_budget_usd: int
     flows_enabled: bool
     formularios_url: str
-    sheets_id: str
-    sheets_tab: str
+    sheets_targets: dict  # flow name -> {"id": spreadsheet id, "tab": tab name}
 
     @property
     def param_path(self) -> str:
@@ -88,8 +87,10 @@ class ClientConfig:
             monthly_budget_usd=int(alerts.get("monthly_budget_usd", 25)),
             flows_enabled=bool(flows.get("enabled", False)),
             formularios_url=flows.get("formularios_url", "") or "",
-            sheets_id=str(flows.get("sheets_id", "") or ""),
-            sheets_tab=flows.get("sheets_tab", "Facturas") or "Facturas",
+            sheets_targets={
+                str(t["flow"]): {"id": str(t.get("id", "") or ""), "tab": str(t.get("tab", "Facturas") or "Facturas")}
+                for t in (flows.get("sheets") or [])
+            },
         )
         if cfg.ingress not in ("tunnel", "caddy"):
             raise ValueError("gestor.ingress must be 'tunnel' or 'caddy'")
@@ -101,6 +102,9 @@ class ClientConfig:
             raise ValueError("flows need at least a 2 GB VM (t4g.small with swap; t4g.medium recommended)")
         if cfg.flows_enabled and not cfg.alert_email:
             raise ValueError("flows need alerts.email: it becomes the n8n owner account")
+        for flow in cfg.sheets_targets:
+            if not re.fullmatch(r"[a-z0-9-]+", flow):
+                raise ValueError(f"flows.sheets[].flow must be lowercase letters, digits or '-': {flow!r}")
         return cfg
 
     @property

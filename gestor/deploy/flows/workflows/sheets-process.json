@@ -16,6 +16,18 @@
     },
     {
       "parameters": {
+        "jsCode": "// Entrada: { doc_id, flow? }. El nombre del flujo elige las etiquetas (flujo:<flow>[:estado]) y la hoja destino\n// (FLOWS_SHEETS_TARGETS = {\"sheets\": {\"id\": \"...\", \"tab\": \"Facturas\"}, \"sheets-luis\": {...}}).\nconst flow = String($json.flow || 'sheets');\nif (!/^[a-z0-9-]+$/.test(flow)) throw new Error(`Nombre de flujo inválido: ${flow}`);\nlet targets = {};\ntry { targets = JSON.parse($env.FLOWS_SHEETS_TARGETS || '{}'); } catch (e) { throw new Error('FLOWS_SHEETS_TARGETS no es JSON válido'); }\nconst sheet = targets[flow] || { id: '', tab: 'Facturas' };\nconst prefix = `flujo:${flow}`;\nreturn [{ json: { doc_id: Number($json.doc_id), flow, prefix, sheet: { id: sheet.id || '', tab: sheet.tab || 'Facturas' } } }];\n"
+      },
+      "name": "Config",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        0
+      ]
+    },
+    {
+      "parameters": {
         "workflowId": {
           "__rl": true,
           "value": "pplGetDocument01",
@@ -30,7 +42,7 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        220,
+        320,
         0
       ]
     },
@@ -46,7 +58,7 @@
           "conditions": [
             {
               "id": "c1",
-              "leftValue": "={{ $json.tag_names.includes('flujo:sheets') && !['flujo:sheets:procesando','flujo:sheets:ok','flujo:sheets:revisar','flujo:sheets:error'].some(t => $json.tag_names.includes(t)) }}",
+              "leftValue": "={{ $json.tag_names.includes($('Config').first().json.prefix) && !['procesando','ok','revisar','error'].some(s => $json.tag_names.includes($('Config').first().json.prefix + ':' + s)) }}",
               "rightValue": "",
               "operator": {
                 "type": "boolean",
@@ -79,7 +91,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// La etiqueta \"procesando\" está en has_not_tags del workflow nativo: las escrituras que siguen no lo vuelven a disparar.\nreturn [{ json: { doc_id: $json.id, add_tags: ['flujo:sheets:procesando'] } }];\n"
+        "jsCode": "// La etiqueta \"procesando\" está en has_not_tags del workflow nativo: las escrituras que siguen no lo vuelven a disparar.\nconst c = $('Config').first().json;\nreturn [{ json: { doc_id: $json.id, add_tags: [`${c.prefix}:procesando`] } }];\n"
       },
       "name": "Marcar procesando",
       "type": "n8n-nodes-base.code",
@@ -163,7 +175,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Convierte la respuesta de Formularios en campos de Paperless, una fila para Sheets y el estado (ok / revisar).\nconst doc = $('Leer documento').first().json;\nconst res = $input.first().json;\nif (res.error || !Array.isArray(res.fields)) {\n  let err = res.error ? (typeof res.error === 'string' ? res.error : (res.error.message || JSON.stringify(res.error))) : 'respuesta sin campos';\n  err = err.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 300);\n  return [{ json: { ok: false, doc_id: doc.id, error: err } }];\n}\nconst byKey = Object.fromEntries(res.fields.map(f => [f.key, f]));\nconst val = k => (byKey[k] && byKey[k].value != null && byKey[k].value !== '') ? byKey[k].value : null;\nconst names = { ruc_emisor: 'RUC emisor', numero_factura: 'Número de factura', fecha_emision: 'Fecha de emisión',\n  subtotal: 'Subtotal', iva: 'IVA', total: 'Total' };\nconst fields = {};\nfor (const [k, n] of Object.entries(names)) fields[n] = val(k);\nconst clave = res.checks && res.checks.clave_acceso;\nif (clave && clave.value) fields['Clave de acceso'] = clave.value;\nconst dudosos = res.fields.filter(f => f.status !== 'green').map(f => `${f.label}${f.value ? ' = ' + f.value : ' (vacío)'}`);\nconst totals = res.checks && res.checks.totals ? res.checks.totals : {};\nconst estado = (dudosos.length === 0 && totals.ok !== false) ? 'ok' : 'revisar';\nconst row = { 'Documento': doc.id, 'Título': doc.title, 'RUC emisor': val('ruc_emisor'),\n  'Número de factura': val('numero_factura'), 'Fecha de emisión': val('fecha_emision'),\n  'Subtotal': val('subtotal'), 'IVA': val('iva'), 'Total': val('total'), 'Estado': estado,\n  'Enlace': `${$env.PAPERLESS_PUBLIC_URL}/documents/${doc.id}/details`, 'Procesado': new Date().toISOString() };\nreturn [{ json: { ok: true, doc_id: doc.id, estado, fields, dudosos, totals_note: totals.ok === false ? totals.note : null, row } }];\n"
+        "jsCode": "// Convierte la respuesta de Formularios en campos de Paperless, una fila para Sheets y el estado (ok / revisar).\nconst doc = $('Leer documento').first().json;\nconst cfg = $('Config').first().json;\nconst res = $input.first().json;\nif (res.error || !Array.isArray(res.fields)) {\n  let err = res.error ? (typeof res.error === 'string' ? res.error : (res.error.message || JSON.stringify(res.error))) : 'respuesta sin campos';\n  err = err.replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').trim().slice(0, 300);\n  return [{ json: { ok: false, doc_id: doc.id, error: err } }];\n}\nconst byKey = Object.fromEntries(res.fields.map(f => [f.key, f]));\nconst val = k => (byKey[k] && byKey[k].value != null && byKey[k].value !== '') ? byKey[k].value : null;\nconst names = { ruc_emisor: 'RUC emisor', numero_factura: 'Número de factura', fecha_emision: 'Fecha de emisión',\n  subtotal: 'Subtotal', iva: 'IVA', total: 'Total' };\nconst fields = {};\nfor (const [k, n] of Object.entries(names)) fields[n] = val(k);\nconst clave = res.checks && res.checks.clave_acceso;\nif (clave && clave.value) fields['Clave de acceso'] = clave.value;\nconst dudosos = res.fields.filter(f => f.status !== 'green').map(f => `${f.label}${f.value ? ' = ' + f.value : ' (vacío)'}`);\nconst totals = res.checks && res.checks.totals ? res.checks.totals : {};\nconst estado = (dudosos.length === 0 && totals.ok !== false) ? 'ok' : 'revisar';\nconst row = { 'Documento': doc.id, 'Título': doc.title, 'RUC emisor': val('ruc_emisor'),\n  'Número de factura': val('numero_factura'), 'Fecha de emisión': val('fecha_emision'),\n  'Subtotal': val('subtotal'), 'IVA': val('iva'), 'Total': val('total'), 'Estado': estado,\n  'Enlace': `${$env.PAPERLESS_PUBLIC_URL}/documents/${doc.id}/details`, 'Procesado': new Date().toISOString() };\nreturn [{ json: { ok: true, doc_id: doc.id, flow: cfg.flow, sheet: cfg.sheet, estado, fields, dudosos, totals_note: totals.ok === false ? totals.note : null, row } }];\n"
       },
       "name": "Interpretar",
       "type": "n8n-nodes-base.code",
@@ -185,7 +197,7 @@
           "conditions": [
             {
               "id": "c1",
-              "leftValue": "={{ $json.ok === true && !!$env.FLOWS_SHEETS_ID }}",
+              "leftValue": "={{ $json.ok === true && !!$json.sheet.id }}",
               "rightValue": "",
               "operator": {
                 "type": "boolean",
@@ -224,12 +236,12 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "={{ $env.FLOWS_SHEETS_ID }}",
+          "value": "={{ $('Config').first().json.sheet.id }}",
           "mode": "id"
         },
         "sheetName": {
           "__rl": true,
-          "value": "={{ $env.FLOWS_SHEETS_TAB }}",
+          "value": "={{ $('Config').first().json.sheet.tab }}",
           "mode": "name"
         },
         "columns": {
@@ -259,7 +271,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Decide la etiqueta final y redacta la nota que queda en el documento.\nconst r = $('Interpretar').first().json;\nconst sheetsRan = $('Agregar fila').isExecuted;\nconst sheetsOut = sheetsRan ? $('Agregar fila').first().json : null;\nconst sheetsErr = sheetsOut && sheetsOut.error ? (typeof sheetsOut.error === 'string' ? sheetsOut.error : (sheetsOut.error.message || JSON.stringify(sheetsOut.error))) : null;\nconst lines = [];\nlet estado;\nif (!r.ok) {\n  estado = 'error';\n  lines.push(`Formularios no pudo leer el documento: ${r.error}`);\n} else {\n  estado = r.estado;\n  if (r.dudosos.length) lines.push('Campos por revisar: ' + r.dudosos.join('; '));\n  if (r.totals_note) lines.push(r.totals_note);\n  if (sheetsRan && !sheetsErr) lines.push(`Fila agregada en Google Sheets (${$env.FLOWS_SHEETS_TAB}).`);\n  if (sheetsErr) { estado = 'error'; lines.push(`No se pudo escribir en Google Sheets: ${sheetsErr}`); }\n  if (!$env.FLOWS_SHEETS_ID) lines.push('Google Sheets no configurado (FLOWS_SHEETS_ID vacío).');\n}\nconst labels = { ok: 'lectura completa', revisar: 'lectura con dudas', error: 'error' };\nreturn [{ json: { doc_id: r.doc_id, add_tags: [`flujo:sheets:${estado}`], remove_tags: ['flujo:sheets:procesando'],\n  fields: r.ok ? r.fields : {}, note: `Flujo sheets: ${labels[estado]}.` + (lines.length ? '\\n' + lines.join('\\n') : '') } }];\n"
+        "jsCode": "// Decide la etiqueta final y redacta la nota que queda en el documento.\nconst r = $('Interpretar').first().json;\nconst cfg = $('Config').first().json;\nconst sheetsRan = $('Agregar fila').isExecuted;\nconst sheetsOut = sheetsRan ? $('Agregar fila').first().json : null;\nconst sheetsErr = sheetsOut && sheetsOut.error ? (typeof sheetsOut.error === 'string' ? sheetsOut.error : (sheetsOut.error.message || JSON.stringify(sheetsOut.error))) : null;\nconst lines = [];\nlet estado;\nif (!r.ok) {\n  estado = 'error';\n  lines.push(`Formularios no pudo leer el documento: ${r.error}`);\n} else {\n  estado = r.estado;\n  if (r.dudosos.length) lines.push('Campos por revisar: ' + r.dudosos.join('; '));\n  if (r.totals_note) lines.push(r.totals_note);\n  if (sheetsRan && !sheetsErr) lines.push(`Fila agregada en Google Sheets (${cfg.sheet.tab}).`);\n  if (sheetsErr) { estado = 'error'; lines.push(`No se pudo escribir en Google Sheets: ${sheetsErr}`); }\n  if (!cfg.sheet.id) lines.push(`Google Sheets no configurado para el flujo ${cfg.flow} (FLOWS_SHEETS_TARGETS).`);\n}\nconst labels = { ok: 'lectura completa', revisar: 'lectura con dudas', error: 'error' };\nreturn [{ json: { doc_id: r.doc_id, add_tags: [`${cfg.prefix}:${estado}`], remove_tags: [`${cfg.prefix}:procesando`],\n  fields: r.ok ? r.fields : {}, note: `Flujo ${cfg.flow}: ${labels[estado]}.` + (lines.length ? '\\n' + lines.join('\\n') : '') } }];\n"
       },
       "name": "Resultado",
       "type": "n8n-nodes-base.code",
@@ -292,6 +304,17 @@
   ],
   "connections": {
     "Entrada": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
       "main": [
         [
           {

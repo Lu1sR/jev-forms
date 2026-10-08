@@ -43,5 +43,12 @@ alerts:
 flows:
   enabled: true
   formularios_url: https://formularios-api.docutecec.com   # public URL of the engine
-  sheets_id: "1KD02mdX0sNfq5DnDXz14Y93bxkH6NdGK-oWxpkcNUUY"   # spreadsheet id of the "sheets" flow
-  sheets_tab: Facturas
+  # One Google Sheet per flow instance (tags flujo:<flow>...). Each sheet: shared with the
+  # service account as editor, header row as in gestor/deploy/flows/README.md.
+  sheets:
+    - flow: sheets                 # facturas@luis-dev.com (Correo-Familia)
+      id: "1KD02mdX0sNfq5DnDXz14Y93bxkH6NdGK-oWxpkcNUUY"
+      tab: Facturas
+    - flow: sheets-luis            # facturas-luis@luis-dev.com (Correo-Luis)
+      id: ""                       # pending: Luis's spreadsheet id
+      tab: Facturas

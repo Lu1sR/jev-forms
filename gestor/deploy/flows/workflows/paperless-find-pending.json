@@ -94,7 +94,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Documentos con la etiqueta de entrada y sin las de salida. Los marcados \"en proceso\" solo\n// cuentan si llevan más de stale_minutes sin cambios (una ejecución que murió a medias).\nconst q = $('Query').first().json;\nconst docs = $input.first().json.results || [];\nconst cutoff = Date.now() - q.stale_minutes * 60000;\nreturn docs\n  .filter(d => !q.stale_tag_id || !(d.tags || []).includes(q.stale_tag_id) || new Date(d.modified).getTime() < cutoff)\n  .map(d => ({ json: { doc_id: d.id } }));\n"
+        "jsCode": "// Documentos con la etiqueta de entrada y sin las de salida. Los marcados \"en proceso\" solo\n// cuentan si llevan más de stale_minutes sin cambios (una ejecución que murió a medias).\nconst q = $('Query').first().json;\nconst docs = $input.first().json.results || [];\nconst cutoff = Date.now() - q.stale_minutes * 60000;\nreturn docs\n  .filter(d => !q.stale_tag_id || !(d.tags || []).includes(q.stale_tag_id) || new Date(d.modified).getTime() < cutoff)\n  .map(d => ({ json: { doc_id: d.id, flow: $('Entrada').first().json.flow || 'sheets' } }));\n"
       },
       "name": "Pending",
       "type": "n8n-nodes-base.code",
