@@ -231,7 +231,9 @@ class GestorStack(Stack):
             "FLOWS_SHEETS_ID": cfg.sheets_id,
             "FLOWS_SHEETS_TAB": cfg.sheets_tab,
             "N8N_OWNER_EMAIL": cfg.alert_email if cfg.flows_enabled else "",
-            "N8N_MEM_LIMIT": "900m",
+            # On a 2 GB VM n8n must stay small (the 4 GB swap absorbs OCR peaks).
+            "N8N_MEM_LIMIT": "450m" if cfg.small_vm else "900m",
+            "N8N_NODE_OPTIONS": "--max-old-space-size=256" if cfg.small_vm else "--max-old-space-size=512",
         }
         script = BOOTSTRAP.read_text()
         for key, value in {
