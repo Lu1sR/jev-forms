@@ -25,6 +25,9 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 
+# Cloudflare rejects Python's default user agent in front of docs.* instances.
+USER_AGENT = "gestor-flows-setup/1.0"
+
 TRIGGER_TYPES = {"consumption": 1, "document_added": 2, "document_updated": 3, "scheduled": 4}
 ACTION_TYPES = {"assignment": 1, "removal": 2, "email": 3, "webhook": 4}
 MATCH_NONE = 0
@@ -41,6 +44,7 @@ class Api:
             url += ("&" if "?" in url else "?") + urllib.parse.urlencode(query)
         body = json.dumps(data).encode() if data is not None else None
         req = urllib.request.Request(url, data=body, method=method)
+        req.add_header("User-Agent", USER_AGENT)
         req.add_header("Authorization", self.auth)
         req.add_header("Accept", "application/json; version=10")
         if body is not None:
@@ -284,6 +288,7 @@ def apply(api: Api, spec: dict, webhook_secret: str | None) -> None:
 def _token(base: str, username: str, password: str) -> str:
     body = urllib.parse.urlencode({"username": username, "password": password}).encode()
     req = urllib.request.Request(f"{base}/api/token/", data=body, method="POST")
+    req.add_header("User-Agent", USER_AGENT)
     req.add_header("Content-Type", "application/x-www-form-urlencoded")
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.loads(r.read())["token"]
