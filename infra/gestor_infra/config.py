@@ -97,11 +97,16 @@ class ClientConfig:
             raise ValueError("instance.type must be ARM (Graviton): the image is built for arm64")
         if not re.fullmatch(r"\d{2}:\d{2}", cfg.backup_time):
             raise ValueError("backup.time must be HH:MM")
-        if cfg.flows_enabled and cfg.instance_type in ("t4g.nano", "t4g.micro", "t4g.small"):
-            raise ValueError("flows need a 4 GB VM: use t4g.medium or bigger")
+        if cfg.flows_enabled and cfg.instance_type in ("t4g.nano", "t4g.micro"):
+            raise ValueError("flows need at least a 2 GB VM (t4g.small with swap; t4g.medium recommended)")
         if cfg.flows_enabled and not cfg.alert_email:
             raise ValueError("flows need alerts.email: it becomes the n8n owner account")
         return cfg
+
+    @property
+    def small_vm(self) -> bool:
+        """2 GB or less: n8n gets tighter limits so it shares the VM with paperless."""
+        return self.instance_type in ("t4g.nano", "t4g.micro", "t4g.small")
 
     @property
     def compose_profiles(self) -> str:
