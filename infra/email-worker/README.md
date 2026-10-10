@@ -6,10 +6,10 @@ adjuntos a Gestor por su API. No hay buzón ni contraseñas de correo guardadas 
 | Dirección | Etiqueta | Flujo de trabajo en Gestor |
 |---|---|---|
 | `facturas@luis-dev.com` | `Correo-Familia` | Dueño admin; ver y editar grupo `Familia` |
-| `facturas-luis@luis-dev.com` | `Correo-Luis` | Dueño Luis; sin compartir |
+| `fact@luis-dev.com` | `Correo-Luis` | Dueño Luis; sin compartir |
 
 ```
-remitente ──> facturas[-luis]@luis-dev.com ──> Email Routing ──> Worker gestor-correo-familia
+remitente ──> facturas@ o fact@luis-dev.com ──> Email Routing ──> Worker gestor-correo-familia
                                                             │ PDF y fotos adjuntas
                                                             ▼
                          https://docs.luis-dev.com/api/documents/post_document/
@@ -72,7 +72,7 @@ La lista de remitentes y el correo de respaldo van como secretos porque el repo 
    ```
    Poner los ids de las etiquetas en `ROUTES` de `wrangler.toml` y volver a hacer `deploy`.
 4. **Reglas de correo**: Email Routing → Routing rules → Create address, una por dirección de
-   `ROUTES` (`facturas`, `facturas-luis`) → acción *Send to a Worker* → `gestor-correo-familia`.
+   `ROUTES` (`facturas`, `fact`) → acción *Send to a Worker* → `gestor-correo-familia`.
 5. **Probar**: reenviar una factura a cada dirección y revisar en Gestor quién la ve.
    Logs en vivo: `npx wrangler tail`.
 
