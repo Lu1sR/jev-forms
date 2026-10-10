@@ -49,6 +49,6 @@ flows:
     - flow: sheets                 # facturas@luis-dev.com (Correo-Familia)
       id: "1KD02mdX0sNfq5DnDXz14Y93bxkH6NdGK-oWxpkcNUUY"
       tab: Facturas
-    - flow: sheets-luis            # facturas-luis@luis-dev.com (Correo-Luis)
+    - flow: sheets-luis            # fact@luis-dev.com (Correo-Luis)
       id: "1n0KEvaGixGvot09-sM4Cl5_jMEId4GYwEJI6U0fJ7RQ"
       tab: Facturas

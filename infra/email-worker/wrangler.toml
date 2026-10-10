@@ -15,7 +15,7 @@ GESTOR_URL = "https://docs.luis-dev.com"
 # that sets owner and sharing: "Correo-Familia" shared with the Familia group, "Correo-Luis" private.
 ROUTES = '''{
   "facturas@luis-dev.com": "2",
-  "facturas-luis@luis-dev.com": "3"
+  "fact@luis-dev.com": "3"
 }'''
 
 [observability]

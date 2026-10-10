@@ -55,7 +55,7 @@ export function fileName(att, index) {
 }
 
 // ROUTES maps each receiving address to the Gestor tag ids it adds, e.g.
-// {"facturas@luis-dev.com": "12", "facturas-luis@luis-dev.com": "13"}.
+// {"facturas@luis-dev.com": "12", "fact@luis-dev.com": "13"}.
 // Returns null for an address that is not routed (the message is rejected).
 export function tagsForRecipient(routesJson, to) {
   let routes;
