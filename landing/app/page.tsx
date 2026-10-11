@@ -22,33 +22,35 @@ const ARCHIVO_POINTS = [
   { term: "Cada área ve lo suyo", text: "Permisos por grupo e historial de quién cambió qué." },
 ];
 
-const DESTINOS = [
-  { term: "Google Sheets", text: "Una fila por documento, en la hoja que usted elija." },
-  { term: "Su sistema", text: "ERP, contabilidad o CRM, por API o webhook." },
-  { term: "Correo", text: "Un aviso al responsable cuando algo pide atención." },
-  { term: "El mismo archivo", text: "Los datos quedan guardados en cada documento." },
-];
+const ENTRADAS = ["Correo", "Escáner", "Celular", "Carpeta compartida"];
 
-const EJEMPLOS = [
+const SALIDAS = ["Google Sheets", "Su ERP o sistema, por API", "Avisos por correo", "Datos en cada documento"];
+
+const FLUJOS = [
   {
-    area: "Contabilidad",
-    docs: "Facturas, retenciones, notas de venta",
-    flow: "Cada factura que llega al correo se registra en la hoja de compras.",
+    when: "Llega una factura al correo",
+    does: "Lee RUC, fecha y montos, y cuadra la suma",
+    result: "Una fila nueva en la hoja de compras",
   },
   {
-    area: "Talento humano",
-    docs: "Contratos, roles de pagos, certificados",
-    flow: "Un aviso cuando al expediente de alguien le falta un documento.",
+    when: "Se archiva un contrato o una póliza",
+    does: "Lee la fecha de vencimiento",
+    result: "Un aviso por correo 30 días antes",
   },
   {
-    area: "Gerencia y legal",
-    docs: "Contratos, actas, pólizas",
-    flow: "Un correo 30 días antes de que venza un contrato o una póliza.",
+    when: "Ingresa un documento de personal",
+    does: "Revisa qué falta en el expediente",
+    result: "La lista de pendientes para talento humano",
   },
   {
-    area: "Servicio al cliente",
-    docs: "Comprobantes que envían sus clientes",
-    flow: "Sorteos, reembolsos y reclamos validados leyendo el comprobante.",
+    when: "Un cliente envía su comprobante",
+    does: "Valida el monto y la fecha",
+    result: "Aprobado o marcado para revisar",
+  },
+  {
+    when: "Se aprueba un documento",
+    does: "Toma los datos ya revisados",
+    result: "Un registro en su ERP, por API",
   },
 ];
 
@@ -97,7 +99,7 @@ export default function Home() {
             <Wordmark />
           </a>
           <nav className={styles.nav} aria-label="Secciones">
-            <a href="#archivo">Archivo</a>
+            <a href="#gestor">Gestor</a>
             <a href="#flujos">Flujos</a>
             <a href="#cotizar">Cotizar</a>
             <a href="#preguntas">Preguntas</a>
@@ -126,8 +128,8 @@ export default function Home() {
 
               <ul className={styles.products}>
                 {[
-                  { letter: "A", name: "Archiva", note: "Correo, escáner o celular: todo en un solo lugar", href: "#archivo" },
-                  { letter: "B", name: "Encuentra", note: "Por una palabra, una fecha o un monto", href: "#archivo" },
+                  { letter: "A", name: "Archiva", note: "Correo, escáner o celular: todo en un solo lugar", href: "#gestor" },
+                  { letter: "B", name: "Encuentra", note: "Por una palabra, una fecha o un monto", href: "#gestor" },
                   { letter: "C", name: "Automatiza", note: "Flujos que leen y envían los datos", href: "#flujos" },
                 ].map((c) => (
                   <li key={c.letter}>
@@ -167,17 +169,17 @@ export default function Home() {
             </div>
           </dl>
 
-          <section id="archivo" className={`${styles.section} ${styles.copy}`} aria-labelledby="archivo-title">
-            <h2 id="archivo-title" className={styles.band}>
-              <span className={styles.bandName}>Archivo</span>
-              <span className={styles.bandText}>Todo en un solo lugar</span>
+          <section id="gestor" className={`${styles.section} ${styles.copy}`} aria-labelledby="gestor-title">
+            <h2 id="gestor-title" className={styles.band}>
+              <span className={styles.bandName}>Gestor Documental</span>
+              <span className={styles.bandText}>Archive, busque y controle cada documento</span>
             </h2>
             <div className={`${styles.split} ${styles.splitReverse}`}>
               <div className={styles.intro}>
-                <p className={styles.statement}>La carpeta guardada “en algún lado” ya no existe.</p>
+                <p className={styles.statement}>Archiva, lee y encuentra cada documento en segundos.</p>
                 <p className={styles.body}>
-                  Busque como en internet: por una palabra, un monto, una fecha o un nombre. Pruebe con este archivo de
-                  ejemplo.
+                  Busque por una palabra, un monto, una fecha o un nombre, dentro del texto de cada página. Pruebe con
+                  este archivo de ejemplo.
                 </p>
                 <dl className={styles.points}>
                   {ARCHIVO_POINTS.map((p) => (
@@ -226,93 +228,94 @@ export default function Home() {
           <section id="flujos" className={styles.section} aria-labelledby="flujos-title">
             <h2 id="flujos-title" className={styles.band}>
               <span className={styles.bandName}>Flujos</span>
-              <span className={styles.bandText}>Del documento a su sistema</span>
+              <span className={styles.bandText}>Un flujo para cada documento</span>
             </h2>
             <div className={styles.flows}>
-              <p className={styles.statement}>Llega el documento. Sus datos llegan a donde los necesita.</p>
-              <ol className={styles.flow}>
-                <li>
-                  <span className={styles.flowStep}>1</span>
-                  <b>Llega</b>
-                  <span>Por correo, escáner o una foto del celular.</span>
-                </li>
-                <li>
-                  <span className={styles.flowStep}>2</span>
-                  <b>Se lee</b>
-                  <span>Cada dato a su casillero, verificado.</span>
-                </li>
-                <li>
-                  <span className={styles.flowStep}>3</span>
-                  <b>Se envía</b>
-                  <span>A Google Sheets, su ERP, un correo o por API.</span>
-                </li>
-              </ol>
+              <div className={styles.flowsIntro}>
+                <p className={styles.statement}>El gestor es el centro de su operación documental.</p>
+                <p className={styles.body}>
+                  Cada tipo de documento puede tener su propio flujo: se activa cuando el documento entra, cambia o
+                  vence, y lleva sus datos a donde los necesita.
+                </p>
+              </div>
 
-              <div className={styles.flowParts}>
-                <div className={styles.intro}>
-                  <h3 className={styles.subhead}>Extracción: usted define los campos</h3>
-                  <p className={styles.body}>
-                    Lo verificado queda listo; lo dudoso, para revisar; lo que no está, vacío. Nunca un dato inventado.
-                  </p>
-                  <ul className={styles.legend} aria-label="Cómo se marca cada campo">
-                    <li className={styles.legendOk}>
-                      <CheckIcon className={styles.legendIcon} />
-                      Listo
-                    </li>
-                    <li className={styles.legendWarn}>
-                      <QueryIcon className={styles.legendIcon} />
-                      Revisar
-                    </li>
-                    <li className={styles.legendNone}>
-                      <DashIcon className={styles.legendIcon} />
-                      No aparece
-                    </li>
-                  </ul>
-                  <a className={styles.demoLink} href={FORMULARIOS_URL}>
-                    <span className={styles.demoLabel}>Pruebe con un documento suyo</span>
-                    <span className={styles.demoHost}>{hostOf(FORMULARIOS_URL)}</span>
-                    <ArrowIcon className={styles.btnIcon} />
-                  </a>
-                </div>
-                <div className={styles.intro}>
-                  <h3 className={styles.subhead}>Destinos: a donde ya trabaja</h3>
-                  <dl className={styles.points}>
-                    {DESTINOS.map((d) => (
-                      <div key={d.term}>
-                        <dt>{d.term}</dt>
-                        <dd>{d.text}</dd>
-                      </div>
+              <div
+                className={styles.hub}
+                role="img"
+                aria-label="Los documentos entran al gestor por correo, escáner, celular o carpeta, y sus flujos envían los datos a Google Sheets, su ERP, avisos por correo o al mismo documento."
+              >
+                <div className={styles.hubSide}>
+                  <span className={styles.hubLabel}>Entra por</span>
+                  <ul>
+                    {ENTRADAS.map((e) => (
+                      <li key={e}>{e}</li>
                     ))}
-                  </dl>
+                  </ul>
+                </div>
+                <div className={styles.hubCore}>
+                  <Wordmark inverse />
+                  <b>Gestor documental</b>
+                  <span>Archiva · Lee · Ejecuta sus flujos</span>
+                </div>
+                <div className={`${styles.hubSide} ${styles.hubOut}`}>
+                  <span className={styles.hubLabel}>Sale hacia</span>
+                  <ul>
+                    {SALIDAS.map((e) => (
+                      <li key={e}>{e}</li>
+                    ))}
+                  </ul>
                 </div>
               </div>
-            </div>
-          </section>
 
-          <section id="ejemplos" className={styles.section} aria-labelledby="ejemplos-title">
-            <h2 id="ejemplos-title" className={styles.band}>
-              <span className={styles.bandName}>Ejemplos</span>
-              <span className={styles.bandText}>Un flujo por área</span>
-            </h2>
-            <div className={styles.tableWrap}>
-              <table className={styles.areas}>
-                <thead>
-                  <tr>
-                    <th scope="col">Área</th>
-                    <th scope="col">Documentos</th>
-                    <th scope="col">Flujo de ejemplo</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {EJEMPLOS.map((a) => (
-                    <tr key={a.area}>
-                      <th scope="row">{a.area}</th>
-                      <td>{a.docs}</td>
-                      <td>{a.flow}</td>
+              <div className={styles.flowTable}>
+                <h3 className={styles.subhead}>Algunos flujos que puede activar</h3>
+                <table className={styles.areas}>
+                  <thead>
+                    <tr>
+                      <th scope="col">Cuando</th>
+                      <th scope="col">El flujo</th>
+                      <th scope="col">Resultado</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {FLUJOS.map((f) => (
+                      <tr key={f.when}>
+                        <th scope="row">{f.when}</th>
+                        <td>{f.does}</td>
+                        <td>{f.result}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className={styles.extract}>
+                <div className={styles.extractText}>
+                  <h3 className={styles.subhead}>Extracción: usted define los campos</h3>
+                  <p className={styles.body}>
+                    Lo verificado queda listo; lo dudoso, para revisar; lo que no está, vacío.
+                  </p>
+                </div>
+                <ul className={styles.legend} aria-label="Cómo se marca cada campo">
+                  <li className={styles.legendOk}>
+                    <CheckIcon className={styles.legendIcon} />
+                    Listo
+                  </li>
+                  <li className={styles.legendWarn}>
+                    <QueryIcon className={styles.legendIcon} />
+                    Revisar
+                  </li>
+                  <li className={styles.legendNone}>
+                    <DashIcon className={styles.legendIcon} />
+                    No aparece
+                  </li>
+                </ul>
+                <a className={styles.demoLink} href={FORMULARIOS_URL}>
+                  <span className={styles.demoLabel}>Pruebe con un documento suyo</span>
+                  <span className={styles.demoHost}>{hostOf(FORMULARIOS_URL)}</span>
+                  <ArrowIcon className={styles.btnIcon} />
+                </a>
+              </div>
             </div>
           </section>
 
@@ -383,9 +386,9 @@ export default function Home() {
           <nav className={styles.footCols} aria-label="Enlaces">
             <div>
               <h3>docutecec</h3>
-              <a href="#archivo">Archivo</a>
+              <a href="#gestor">Gestor documental</a>
               <a href="#flujos">Flujos</a>
-              <a href="#ejemplos">Ejemplos</a>
+              <a href="#cotizar">Cotizar</a>
             </div>
             <div>
               <h3>Demos</h3>

@@ -31,7 +31,7 @@ feature cards.
 OWN-WORLD: White form sheet ruled in one petrol-blue spot ink; section headings sit
 in solid spot bands; fields are ruled boxes with three-digit casillero codes; filled
 values typed in near-black Chivo Mono; labels and headings in Archivo (narrow for
-labels, expanded heavy for display). Carbon-copy celeste paper for the Archivo
+labels, expanded heavy for display). Carbon-copy celeste paper for the Gestor Documental
 section. Green check and red query only as status marks.
 
 STORY: The visitor watches an invoice become filled casilleros, searches a tiny
