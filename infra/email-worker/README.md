@@ -20,13 +20,17 @@ remitente ──> facturas@ o fact@luis-dev.com ──> Email Routing ──> Wo
 
 | Caso | Resultado |
 |---|---|
-| Dirección sin etiquetas en `ROUTES` | Rechazado ("Dirección no configurada") |
-| Remitente fuera de `ALLOWED_SENDERS` | Rechazado ("Remitente no autorizado") |
-| Sin PDF ni fotos | Rechazado, con un mensaje que pide reenviar la factura como adjunto |
+| Dirección sin etiquetas en `ROUTES` | Reenviado a `FALLBACK_EMAIL` |
+| Remitente fuera de `ALLOWED_SENDERS` | Reenviado a `FALLBACK_EMAIL` (no entra a Gestor) |
+| Sin PDF ni fotos | Reenviado a `FALLBACK_EMAIL` |
 | PDF (también `application/octet-stream` con `.pdf`) | Subido |
 | Fotos JPG/PNG/TIFF/WebP adjuntas de 30 KB o más | Subidas |
 | XML del SRI, zip, logos en línea, píxeles | Ignorados (Gestor no lee el XML; el PDF RIDE sí) |
-| Gestor caído o con error | 3 intentos (0, 3 y 10 s); si siguen fallando, reenvía el correo completo a `FALLBACK_EMAIL` con la cabecera `X-Gestor-Error` |
+| Gestor caído o con error | 3 intentos (0, 3 y 10 s); si siguen fallando, reenviado a `FALLBACK_EMAIL` |
+
+Ningún correo se pierde: todo lo que no termina en Gestor se reenvía completo a
+`FALLBACK_EMAIL` con la cabecera `X-Gestor-Motivo` (por qué no entró). Solo si
+`FALLBACK_EMAIL` no está configurado se rechaza y el remitente recibe el rebote.
 
 El remitente se compara con el sobre (`MAIL FROM`, que cubre los reenvíos automáticos de
 Gmail, `luis+caf_=…@gmail.com`) y con la cabecera `From` (que cubre a los proveedores que
@@ -46,7 +50,7 @@ Límites de Cloudflare: 5 MiB por mensaje, y CPU limitada en el plan gratuito de
 | `ROUTES` | var | JSON: dirección → ids de etiquetas de Gestor, separados por comas |
 | `GESTOR_TOKEN` | secreto | token de la API del usuario `correo` |
 | `ALLOWED_SENDERS` | secreto | `a@gmail.com, b@gmail.com, @proveedor.ec` |
-| `FALLBACK_EMAIL` | secreto | destino **verificado** en Email Routing para correos que no se pudieron subir |
+| `FALLBACK_EMAIL` | secreto | destino **verificado** en Email Routing para todo correo que no entra a Gestor |
 
 La lista de remitentes y el correo de respaldo van como secretos porque el repo es público.
 

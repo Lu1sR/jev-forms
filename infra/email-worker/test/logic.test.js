@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { fileName, isAllowed, normalizeAddress, parseAllowList, pickAttachments, tagsForRecipient } from "../src/logic.js";
+import { fileName, headerSafe, isAllowed, normalizeAddress, parseAllowList, pickAttachments, tagsForRecipient } from "../src/logic.js";
 
 test("parseAllowList splits on commas, spaces and semicolons", () => {
   assert.deepEqual(parseAllowList(" A@x.com, @Prov.ec;b@y.com\n"), ["a@x.com", "@prov.ec", "b@y.com"]);
@@ -49,4 +49,10 @@ test("tagsForRecipient picks the tags of the receiving address", () => {
   assert.equal(tagsForRecipient(routes, "otro@luis-dev.com"), null);
   assert.deepEqual(tagsForRecipient('{"a@x.com": ""}', "a@x.com"), []);
   assert.throws(() => tagsForRecipient("{bad", "a@x.com"), /ROUTES/);
+});
+
+test("headerSafe keeps a single ASCII line", () => {
+  assert.equal(headerSafe("Remitente no autorizado para este buzón"), "Remitente no autorizado para este buzon");
+  assert.equal(headerSafe("a.pdf: HTTP 500\n<html>"), "a.pdf: HTTP 500<html>");
+  assert.equal(headerSafe("x".repeat(2000)).length, 900);
 });

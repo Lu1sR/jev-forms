@@ -72,3 +72,11 @@ export function tagsForRecipient(routesJson, to) {
   }
   return null;
 }
+
+// Header values must be single-line ASCII; error bodies from Gestor may not be.
+export function headerSafe(text) {
+  return text
+    .normalize("NFD")
+    .replace(/[^\x20-\x7e]/g, "")
+    .slice(0, 900);
+}
