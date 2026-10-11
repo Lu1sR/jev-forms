@@ -1,7 +1,8 @@
 // Email Worker: facturas@<domain> -> Gestor (paperless-ngx) API.
 // Cloudflare Email Routing hands each message here; PDFs and photos go to
-// /api/documents/post_document/. If Gestor cannot take them, the whole message is
-// forwarded to FALLBACK_EMAIL so nothing is lost.
+// /api/documents/post_document/. Anything that does not end up in Gestor (unknown
+// sender, no attachments, Gestor down...) is forwarded whole to FALLBACK_EMAIL, so no
+// message is ever lost; the X-Gestor-Motivo header says why.
 //
 // Each receiving address gets its own Gestor tag (ROUTES); a Gestor workflow per tag
 // decides owner and sharing, e.g. household bills shared with the family group and
@@ -11,7 +12,7 @@
 // Secrets (wrangler secret put): GESTOR_TOKEN, ALLOWED_SENDERS, FALLBACK_EMAIL
 
 import PostalMime from "postal-mime";
-import { fileName, isAllowed, parseAllowList, pickAttachments, tagsForRecipient } from "./logic.js";
+import { fileName, headerSafe, isAllowed, parseAllowList, pickAttachments, tagsForRecipient } from "./logic.js";
 
 const RETRY_DELAYS_MS = [0, 3_000, 10_000];
 
@@ -19,16 +20,14 @@ export default {
   async email(message, env) {
     const allowList = parseAllowList(env.ALLOWED_SENDERS);
     if (allowList.length === 0) {
-      console.error("ALLOWED_SENDERS is empty; rejecting everything");
-      message.setReject("Buzón no configurado");
-      return;
+      console.error("ALLOWED_SENDERS is empty; nothing goes to Gestor");
+      return divert(message, env, "buzon no configurado (ALLOWED_SENDERS vacio)", "Buzón no configurado");
     }
 
-    // An address without tags would land unshared and invisible to the family; refuse it.
+    // An address without tags would land unshared and invisible to the family; keep it out of Gestor.
     const tags = tagsForRecipient(env.ROUTES, message.to);
     if (!tags || tags.length === 0) {
-      message.setReject("Dirección no configurada");
-      return;
+      return divert(message, env, "direccion sin etiquetas en ROUTES", "Dirección no configurada");
     }
 
     const email = await PostalMime.parse(message.raw);
@@ -37,15 +36,18 @@ export default {
     // through mailing services whose envelope is a bounce address.
     const senders = [message.from, email.from?.address, email.sender?.address].filter(Boolean);
     if (!isAllowed(senders, allowList)) {
-      console.log(`rejected sender ${senders.map(domainOf).join(",")}`);
-      message.setReject("Remitente no autorizado para este buzón");
-      return;
+      console.log(`unknown sender ${senders.map(domainOf).join(",")}`);
+      return divert(message, env, "remitente no autorizado", "Remitente no autorizado para este buzón");
     }
 
     const files = pickAttachments(email.attachments);
     if (files.length === 0) {
-      message.setReject("El correo no trae PDF ni fotos adjuntas; reenvíe la factura como adjunto");
-      return;
+      return divert(
+        message,
+        env,
+        "sin PDF ni fotos adjuntas",
+        "El correo no trae PDF ni fotos adjuntas; reenvíe la factura como adjunto",
+      );
     }
 
     const failures = [];
@@ -60,14 +62,26 @@ export default {
     if (failures.length === 0) return;
 
     console.error(`upload failed: ${failures.join(" | ")}`);
-    if (!env.FALLBACK_EMAIL) {
-      message.setReject("Gestor no está disponible; intente de nuevo más tarde");
-      return;
-    }
-    const headers = new Headers({ "X-Gestor-Error": failures.join(" | ").slice(0, 900) });
-    await message.forward(env.FALLBACK_EMAIL, headers);
+    return divert(
+      message,
+      env,
+      `error al subir a Gestor: ${failures.join(" | ")}`,
+      "Gestor no está disponible; intente de nuevo más tarde",
+    );
   },
 };
+
+// Forwards the whole message to FALLBACK_EMAIL. Only without a fallback does the sender
+// get a bounce, so a missing secret never drops mail silently.
+async function divert(message, env, reason, rejectText) {
+  if (!env.FALLBACK_EMAIL) {
+    message.setReject(rejectText);
+    return;
+  }
+  console.log(`forwarded to fallback: ${reason.slice(0, 200)}`);
+  const headers = new Headers({ "X-Gestor-Motivo": headerSafe(reason) });
+  await message.forward(env.FALLBACK_EMAIL, headers);
+}
 
 async function uploadWithRetry(env, att, name, tags) {
   let lastError;
