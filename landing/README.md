@@ -1,11 +1,14 @@
 # Landing docutecec.com
 
-Página comercial de la marca **docutecec**. Vende dos productos, juntos o por separado:
+Página comercial de **docutecec**, un solo producto: el gestor documental. La página no
+nombra paperless-ngx; habla del software como propio. Su característica central es el
+motor de flujos, y la extracción de datos (antes "Formularios") se presenta como un paso
+de un flujo, con Google Sheets como destino de ejemplo entre varios.
 
-| Producto | Qué hace | Demo |
-|----------|----------|------|
-| Formularios | Lee comprobantes ecuatorianos y llena formularios (`web/` + `engine/` de este repo) | `formularios.docutecec.com` |
-| Gestor | Gestor documental basado en paperless-ngx (otro repositorio) | `gestor.docutecec.com` |
+| Demo | Qué muestra | Dominio |
+|------|-------------|---------|
+| Gestor | El gestor documental, basado en paperless-ngx (`gestor/`) | `gestor.docutecec.com` |
+| Extracción | Lectura de un documento en casilleros (`web/` + `engine/`) | `formularios.docutecec.com` |
 
 Todo el contenido de demostración (la factura del hero y el archivo del buscador) es
 ficticio y va rotulado como tal. La página no muestra precios, clientes ni cifras.

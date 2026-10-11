@@ -519,16 +519,31 @@
   min-width: 0;
 }
 
-/* Suite ------------------------------------------------------------- */
+/* Flows ------------------------------------------------------------- */
 
-.suite {
+.flows {
   display: grid;
   gap: 2rem;
   padding: clamp(2rem, 1rem + 3vw, 4rem) var(--gutter);
 }
 
-.suite .statement {
+.flows .statement {
   max-width: 30ch;
+}
+
+/* Extraction and destinations, the two halves of a flow, side by side. */
+.flowParts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(2rem, 1rem + 3vw, 4.5rem);
+  padding-top: 0.5rem;
+}
+
+.subhead {
+  color: var(--ink);
+  font-size: var(--step-1);
+  font-weight: 800;
+  line-height: 1.25;
 }
 
 .flow {
@@ -890,7 +905,8 @@
 
   .split,
   .splitReverse,
-  .quote {
+  .quote,
+  .flowParts {
     grid-template-columns: minmax(0, 1fr);
   }
 

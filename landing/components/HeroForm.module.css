@@ -377,17 +377,12 @@
 
 .checkBody {
   grid-area: body;
-  display: grid;
-  gap: 0.25rem;
-  padding-block: 0.625rem;
-  font-size: var(--step--1);
-  font-weight: 600;
-}
-
-.checkBody p {
   display: flex;
   gap: 0.375rem;
   align-items: flex-start;
+  padding-block: 0.625rem;
+  font-size: var(--step--1);
+  font-weight: 600;
 }
 
 .checkBody .icon {
@@ -395,6 +390,168 @@
 }
 
 .checkBody b {
+  font-weight: 600;
+}
+
+/* Flow steps: which part of the flow the example is in. */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-bottom: 1px solid var(--spot-rule);
+  background: #fff;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.125rem;
+  padding: 0 0.875rem;
+  color: var(--ink-3);
+  font-size: var(--step--1);
+  font-weight: 700;
+  transition:
+    color 0.3s var(--ease-out),
+    background-color 0.3s var(--ease-out);
+}
+
+.step + .step {
+  border-left: 1px solid var(--spot-hair);
+}
+
+.stepNum {
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 1.5px solid currentColor;
+  font-family: var(--font-figure);
+  font-size: var(--step--2);
+}
+
+.stepOn {
+  color: var(--spot);
+  background: rgb(247 229 58 / 0.22);
+}
+
+.stepOn .stepNum {
+  border-color: var(--spot);
+  background: var(--spot);
+  color: #fff;
+}
+
+.stepDone {
+  color: var(--ok);
+}
+
+/* Destination: the row the flow writes in Google Sheets. */
+.dest {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  grid-template-areas: "code body";
+  column-gap: 0.75rem;
+  border-top: 1px solid var(--spot-hair);
+}
+
+.destBody {
+  grid-area: body;
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.625rem 0.75rem 0.75rem 0;
+}
+
+.destHead {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--ink-2);
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+.destHead b {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.destState {
+  margin-left: auto;
+  color: var(--ink-3);
+  font-size: var(--step--2);
+  font-weight: 700;
+  font-variation-settings: "wdth" 85;
+  white-space: nowrap;
+}
+
+.sheet {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 0.6875rem;
+}
+
+.sheet th,
+.sheet td {
+  height: 1.625rem;
+  padding: 0 0.375rem;
+  border: 1px solid var(--spot-hair);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.sheet thead th {
+  background: var(--spot-wash);
+  color: var(--spot);
+  font-size: var(--step--2);
+  font-weight: 600;
+  font-variation-settings: "wdth" 80;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.sheet thead th:first-child {
+  width: 2rem;
+}
+
+.sheet tbody th {
+  background: var(--spot-wash);
+  color: var(--ink-3);
+  font-family: var(--font-figure);
+  font-weight: 500;
+  text-align: center;
+}
+
+.sheet thead th:nth-child(2) {
+  width: 23%;
+}
+
+.sheet thead th:nth-child(3) {
+  width: 28%;
+}
+
+.sheet thead th:last-child,
+.sheet td:last-child {
+  width: 17%;
+  text-align: right;
+}
+
+.sheet td {
+  font-family: var(--font-figure);
+  font-variant-numeric: tabular-nums;
+}
+
+.rowIn td {
+  background: rgb(29 107 59 / 0.08);
+  animation: tag-in 0.35s var(--ease-out);
+}
+
+.destMore {
+  color: var(--ink-3);
+  font-size: var(--step--2);
   font-weight: 600;
 }
 

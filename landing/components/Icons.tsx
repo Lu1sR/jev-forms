@@ -70,3 +70,13 @@ export function ReplayIcon({ className }: Props) {
     </svg>
   );
 }
+
+// A generic spreadsheet: the destination of a flow, not any vendor's logo.
+export function SheetIcon({ className }: Props) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="4" y="3.5" width="16" height="17" rx="1.5" />
+      <path d="M4 9h16M4 14.5h16M10 9v11.5" />
+    </svg>
+  );
+}

@@ -4,6 +4,8 @@
 export const FORMULARIOS_URL =
   process.env.NEXT_PUBLIC_FORMULARIOS_URL || "https://formularios.docutecec.com";
 export const GESTOR_URL = process.env.NEXT_PUBLIC_GESTOR_URL || "https://gestor.docutecec.com";
+// Demos keep their subdomains: gestor.* is the document manager itself and
+// formularios.* the extraction step of a flow, tried with your own document.
 // Shared login of the Gestor demo (read-mostly "Demo" group, see gestor/README.md).
 // Shown next to the link only when both are set.
 export const GESTOR_DEMO_USER = process.env.NEXT_PUBLIC_GESTOR_DEMO_USER || "";
@@ -14,7 +16,7 @@ export const SALES_EMAIL = process.env.NEXT_PUBLIC_SALES_EMAIL || "contacto@docu
 const WHATSAPP = (process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "").replace(/\D/g, "");
 
 export const DEFAULT_MESSAGE =
-  "Hola, vengo de docutecec.com y quiero saber más sobre Formularios y Gestor.";
+  "Hola, vengo de docutecec.com y quiero saber más sobre el gestor documental.";
 
 /** WhatsApp chat with a prefilled message; falls back to email when no number is set. */
 export function contactHref(message: string = DEFAULT_MESSAGE): string {

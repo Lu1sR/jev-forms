@@ -5,10 +5,10 @@ import { HAS_WHATSAPP, contactHref } from "@/lib/site";
 import { MailIcon, WhatsAppIcon } from "./Icons";
 import styles from "./QuoteForm.module.css";
 
-const PRODUCTS = [
-  { id: "formularios", name: "Formularios", note: "Leer comprobantes y llenar formularios" },
-  { id: "gestor", name: "Gestor", note: "Archivar y encontrar todos los documentos" },
-  { id: "suite", name: "Suite completa", note: "Formularios y Gestor" },
+const NEEDS = [
+  { id: "archivo", name: "Archivo y búsqueda", note: "Ordenar y encontrar todos los documentos" },
+  { id: "flujos", name: "Archivo y flujos", note: "Además, llevar sus datos a otros sistemas" },
+  { id: "nose", name: "Aún no lo sé", note: "Lo vemos juntos con sus documentos" },
 ] as const;
 
 const INSTALLS = [
@@ -21,18 +21,19 @@ const VOLUMES = ["Menos de 500", "De 500 a 5.000", "Más de 5.000"];
 const USERS = ["De 1 a 5", "De 6 a 25", "Más de 25"];
 
 export default function QuoteForm() {
-  const [product, setProduct] = useState<string>("suite");
+  const [need, setNeed] = useState<string>("flujos");
   const [install, setInstall] = useState<string>("nube");
   const [volume, setVolume] = useState(VOLUMES[1]);
   const [users, setUsers] = useState(USERS[0]);
   const [company, setCompany] = useState("");
   const id = useId();
 
-  const productName = PRODUCTS.find((p) => p.id === product)!.name;
+  const needName = NEEDS.find((n) => n.id === need)!.name.toLowerCase();
   const installName = INSTALLS.find((i) => i.id === install)!.name.toLowerCase();
 
   const message = [
-    `Hola, quiero una cotización de docutecec ${productName}.`,
+    "Hola, quiero una cotización de docutecec.",
+    `Necesito: ${needName}.`,
     company.trim() ? `Empresa: ${company.trim()}.` : null,
     `Instalación: ${installName}.`,
     `Documentos al mes: ${volume.toLowerCase()}.`,
@@ -49,13 +50,13 @@ export default function QuoteForm() {
           <span className={styles.label}>Qué necesita</span>
         </legend>
         <div className={styles.options}>
-          {PRODUCTS.map((p) => (
-            <label key={p.id} className={styles.option}>
-              <input type="radio" name={`${id}-product`} value={p.id} checked={product === p.id} onChange={() => setProduct(p.id)} />
+          {NEEDS.map((n) => (
+            <label key={n.id} className={styles.option}>
+              <input type="radio" name={`${id}-need`} value={n.id} checked={need === n.id} onChange={() => setNeed(n.id)} />
               <span className={styles.box} aria-hidden="true" />
               <span className={styles.optText}>
-                <b>{p.name}</b>
-                <span>{p.note}</span>
+                <b>{n.name}</b>
+                <span>{n.note}</span>
               </span>
             </label>
           ))}

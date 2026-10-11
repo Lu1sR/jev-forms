@@ -9,15 +9,18 @@ related_targets: []
 
 Mode: Persuade. A gerente, contador or jefe administrativo of an Ecuadorian company
 (B2B) lands on docutecec.com, usually from a link or a search, on a desktop at the
-office. They must understand two products, Formularios (reads comprobantes and fills
-forms; demo at formularios.docutecec.com) and Gestor (document manager built on
-paperless-ngx; demo at gestor.docutecec.com), sold separately or together, and act:
-WhatsApp first, try a demo second. Delivery of Gestor: docutecec cloud or the
-client's own server. No prices: quote only. No customers, testimonials or benchmarks
+office. They must understand one product, docutecec, a document manager for any
+kind of document (built on paperless-ngx, never named on the page; demo at
+gestor.docutecec.com). Its headline feature is the flow engine: a document arrives,
+its fields are extracted and sent elsewhere (Google Sheets as the example, also ERP,
+email or any system by API). Extraction, the old "Formularios", is one step of a flow
+(demo at formularios.docutecec.com). Act: WhatsApp first, try a demo second.
+Delivery: docutecec cloud or the client's own server. Copy stays short per section. No prices: quote only. No customers, testimonials or benchmarks
 exist; demonstration data is synthetic and labeled.
 
-Open decisions: WhatsApp number and sales email (env vars); whether the
-Formularios to Gestor integration is built before launch.
+Open decisions: WhatsApp number and sales email (env vars). Only name destinations
+that exist (Google Sheets, email, API/webhook); ERP and accounting systems are
+reached "por API", not as ready-made integrations.
 
 ## Direction contract
 
@@ -28,7 +31,7 @@ feature cards.
 OWN-WORLD: White form sheet ruled in one petrol-blue spot ink; section headings sit
 in solid spot bands; fields are ruled boxes with three-digit casillero codes; filled
 values typed in near-black Chivo Mono; labels and headings in Archivo (narrow for
-labels, expanded heavy for display). Carbon-copy celeste paper for the Gestor
+labels, expanded heavy for display). Carbon-copy celeste paper for the Archivo
 section. Green check and red query only as status marks.
 
 STORY: The visitor watches an invoice become filled casilleros, searches a tiny

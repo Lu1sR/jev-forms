@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { CheckIcon, DashIcon, QueryIcon, ReplayIcon } from "./Icons";
+import { CheckIcon, DashIcon, QueryIcon, ReplayIcon, SheetIcon } from "./Icons";
 import styles from "./HeroForm.module.css";
 
-// Synthetic invoice (RUC, company and access key are made up) read into a
-// form, the way formularios.docutecec.com does it with a real document.
+// Synthetic invoice (RUC, company and access key are made up) run through one
+// docutecec flow: read into casilleros, the way formularios.docutecec.com does it
+// with a real document, then sent as a row to Google Sheets.
 
 type LineId = "ruc" | "number" | "name" | "date" | "subtotal" | "iva" | "total";
 
@@ -35,11 +36,15 @@ const START_DELAY = 700;
 const LINE_PAUSE = 380;
 const CHAR_MS = 26;
 const AFTER_FIELD = 140;
+const SEND_MS = 1100;
+
+const STEPS = ["Documento", "Casilleros", "Destino"];
 
 export default function HeroForm() {
   // index of the field being typed; FIELDS.length means everything is filled
   const [active, setActive] = useState(-1);
   const [chars, setChars] = useState(0);
+  const [sent, setSent] = useState(false);
   const timers = useRef<number[]>([]);
 
   const clear = () => {
@@ -51,6 +56,7 @@ export default function HeroForm() {
     clear();
     setActive(-1);
     setChars(0);
+    setSent(false);
     let t = START_DELAY;
     FIELDS.forEach((field, i) => {
       timers.current.push(
@@ -66,12 +72,16 @@ export default function HeroForm() {
       t += field.value.length * CHAR_MS + AFTER_FIELD;
     });
     timers.current.push(window.setTimeout(() => setActive(FIELDS.length), t + 200));
+    timers.current.push(window.setTimeout(() => setSent(true), t + 200 + SEND_MS));
   }, []);
 
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) {
-      const id = window.setTimeout(() => setActive(FIELDS.length), 0);
+      const id = window.setTimeout(() => {
+        setActive(FIELDS.length);
+        setSent(true);
+      }, 0);
       return () => window.clearTimeout(id);
     }
     const id = window.setTimeout(play, 0);
@@ -82,6 +92,7 @@ export default function HeroForm() {
   }, [play]);
 
   const done = active >= FIELDS.length;
+  const step = active < 0 ? 0 : done ? 2 : 1;
   const readingLine = !done && active >= 0 ? FIELDS[active].line : null;
   const readLines = new Set(
     FIELDS.filter((f, i) => f.line && (i < active || done)).map((f) => f.line as LineId),
@@ -101,11 +112,28 @@ export default function HeroForm() {
     ) : null;
 
   return (
-    <figure className={styles.form} aria-label="Ejemplo: una factura leída y convertida en casilleros llenos">
+    <figure
+      className={styles.form}
+      aria-label="Ejemplo: una factura leída, convertida en casilleros y enviada a Google Sheets"
+    >
       <header className={styles.head}>
-        <span className={styles.headTitle}>Formulario DT-01 · Lectura de comprobante</span>
+        <span className={styles.headTitle}>Flujo DT-01 · Factura → Google Sheets</span>
         <span className={styles.headNote}>Ejemplo con datos ficticios</span>
       </header>
+
+      <ol className={styles.steps} aria-hidden="true">
+        {STEPS.map((name, i) => (
+          <li
+            key={name}
+            className={`${styles.step} ${i === step && !sent ? styles.stepOn : ""} ${
+              i < step || sent ? styles.stepDone : ""
+            }`}
+          >
+            <span className={styles.stepNum}>{i + 1}</span>
+            {name}
+          </li>
+        ))}
+      </ol>
 
       <div className={styles.body}>
         <div className={styles.invoice} aria-hidden="true">
@@ -238,19 +266,58 @@ export default function HeroForm() {
             );
           })}
 
-          <div className={`${styles.check} ${done ? styles.checkOn : ""}`} aria-live="polite">
+          <div className={`${styles.check} ${done ? styles.checkOn : ""}`}>
             <span className={styles.code}>299</span>
-            <div className={styles.checkBody}>
-              <p>
-                <CheckIcon className={styles.icon} />
+            <p className={styles.checkBody}>
+              <CheckIcon className={styles.icon} />
+              <span>
+                Suma verificada: <b className={styles.figure}>120.00 + 18.00 = 138.00</b>
+              </span>
+            </p>
+          </div>
+
+          <div className={`${styles.dest} ${sent ? styles.destOn : ""}`} aria-live="polite">
+            <span className={styles.code}>300</span>
+            <div className={styles.destBody}>
+              <p className={styles.destHead}>
+                <SheetIcon className={styles.icon} />
                 <span>
-                  Suma verificada: <b className={styles.figure}>120.00 + 18.00 = 138.00</b>
+                  Google Sheets · <b>Compras 2026</b>
+                </span>
+                <span className={styles.destState}>
+                  {sent ? (
+                    <span className={styles.ok}>
+                      <CheckIcon className={styles.icon} />
+                      Enviado
+                    </span>
+                  ) : done ? (
+                    "Enviando…"
+                  ) : (
+                    "En espera"
+                  )}
                 </span>
               </p>
-              <p>
-                <CheckIcon className={styles.icon} />
-                <span>Clave de acceso coincide con el RUC, el número y la fecha</span>
-              </p>
+              <table className={styles.sheet}>
+                <thead>
+                  <tr>
+                    <th scope="col" aria-label="Fila" />
+                    <th scope="col">Fecha</th>
+                    <th scope="col">RUC</th>
+                    <th scope="col">Proveedor</th>
+                    <th scope="col">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className={sent ? styles.rowIn : undefined}>
+                    <th scope="row">48</th>
+                    <td>{sent ? "14/03/2026" : ""}</td>
+                    <td>{sent ? "1790012345001" : ""}</td>
+                    <td>{sent ? "Ferretería Los Andes" : ""}</td>
+                    <td>{sent ? "138.00" : ""}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p className={styles.destMore}>También a su ERP, un correo o cualquier sistema por API.</p>
             </div>
           </div>
         </div>
@@ -258,11 +325,15 @@ export default function HeroForm() {
 
       <footer className={styles.foot}>
         <span className={styles.tally}>
-          {done ? "6 listos · 1 para revisar · 1 no aparece en el documento" : "Leyendo la factura…"}
+          {sent
+            ? "6 listos · 1 para revisar · 1 vacío · fila 48 enviada"
+            : done
+              ? "Enviando a Google Sheets…"
+              : "Leyendo la factura…"}
         </span>
-        <button type="button" className={styles.replay} onClick={play} disabled={!done}>
+        <button type="button" className={styles.replay} onClick={play} disabled={!sent}>
           <ReplayIcon className={styles.icon} />
-          Leer de nuevo
+          Repetir
         </button>
       </footer>
     </figure>
