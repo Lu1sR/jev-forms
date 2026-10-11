@@ -129,7 +129,7 @@ components:
 
 Every surface is a form sheet pre-printed in a single petrol-blue spot ink, with docutecec's own data typed into its casilleros. The sheet sits on a cool grey desk, framed by one spot-ink border and a soft paper shadow. Structure comes from ruled lines, not cards: sections open with solid spot-ink bands, content lives in ruled boxes and definition rows, and every filled value is set in a typewriter-like mono. Density is that of a real administrative form: tight rows, small narrow labels, generous display lines only where the page speaks.
 
-The world is light only, because a form is paper. Color is almost monochrome: spot ink, its tints, near-black ink and white. A carbon-copy celeste sheet marks a second paper (the Gestor section). Green and red appear only as status marks on a field, and a yellow highlighter appears only where a document is being read.
+The world is light only, because a form is paper. Color is almost monochrome: spot ink, its tints, near-black ink and white. A carbon-copy celeste sheet marks a second paper (the Gestor Documental section). Green and red appear only as status marks on a field, and a yellow highlighter appears only where a document is being read.
 
 **Key Characteristics:**
 - One spot ink (petrol blue) prints every rule, band, label and code.
@@ -149,7 +149,7 @@ A one-ink print palette: petrol spot and its tints on white paper, near-black ty
 ### Neutral
 - **Desk Grey** (ground): the surface the sheet lies on; visible only at the page margins.
 - **Form White** (sheet): the sheet itself and every field box.
-- **Carbon Celeste** (celeste): the carbon-copy paper of a secondary section (Gestor). One section per page at most.
+- **Carbon Celeste** (celeste): the carbon-copy paper of a secondary section (Gestor Documental). One section per page at most.
 - **Spot Rule** (spot-rule): 1px interior rules between rows and columns; inactive chip and option borders.
 - **Spot Hair** (spot-hair): the finest rule, between casilleros and table columns.
 - **Spot Wash** (spot-wash): tinted code cells, table heads, footers of panels, hover and checked states, focus-within fill of a field.
@@ -192,7 +192,7 @@ A one-ink print palette: petrol spot and its tints on white paper, near-black ty
 
 ## Layout
 
-The page is one sheet (max 90rem) centered on the desk, with a fluid margin that collapses to zero on small screens. Inside, a 12-part grid expressed as 5fr / 7fr splits (text left, form right); the Gestor section runs 6/6 with the form on the left. The fluid gutter (spacing.gutter) is the only horizontal inset. Section bodies use the section rhythm vertically.
+The page is one sheet (max 90rem) centered on the desk, with a fluid margin that collapses to zero on small screens. Inside, a 12-part grid expressed as 5fr / 7fr splits (text left, form right); the Gestor Documental section runs 6/6 with the form on the left. The fluid gutter (spacing.gutter) is the only horizontal inset. Section bodies use the section rhythm vertically.
 
 A sticky header strip (4rem, white at 96%) carries wordmark, nav and the WhatsApp action, closed by a 1.5px spot rule. Under the hero, an identification strip of four boxed fields restates the offer as form data. Sections stack full-bleed inside the sheet, each closed by a 1.5px spot rule and opened by a band.
 

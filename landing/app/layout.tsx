@@ -20,13 +20,13 @@ const figures = Chivo_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://docutecec.com"),
-  title: "docutecec · Lectura de comprobantes y gestión documental para empresas",
+  title: "docutecec · Gestor documental con flujos automáticos para empresas",
   description:
-    "Formularios lee facturas, notas de venta y precuentas y llena sus formularios. Gestor archiva cada documento de su empresa y lo encuentra en segundos. Juntos o por separado, en la nube o en su servidor.",
+    "docutecec archiva y lee cada documento de su empresa, lo encuentra en segundos y lleva sus datos a Google Sheets, su ERP o cualquier sistema. En la nube o en su servidor.",
   openGraph: {
-    title: "docutecec · Deje de digitar. Empiece a encontrar.",
+    title: "docutecec · Sus documentos, trabajando solos.",
     description:
-      "Lectura automática de comprobantes ecuatorianos y gestor documental para empresas. Juntos o por separado.",
+      "Gestor documental para empresas del Ecuador, con flujos que leen sus documentos y envían los datos a donde los necesita.",
     url: "https://docutecec.com",
     siteName: "docutecec",
     locale: "es_EC",

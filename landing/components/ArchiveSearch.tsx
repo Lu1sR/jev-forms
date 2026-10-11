@@ -11,7 +11,7 @@ type Doc = {
   date: string;
   title: string;
   from: string;
-  type: "Factura" | "Contrato" | "Rol de pagos" | "Acta" | "Retención";
+  type: "Factura" | "Contrato" | "Póliza" | "Rol de pagos" | "Acta" | "Retención";
   tags: string[];
   text: string;
 };
@@ -25,13 +25,13 @@ const DOCS: Doc[] = [
   { date: "10/02/2026", title: "Acta de junta general de accionistas", from: "Gerencia", type: "Acta", tags: ["legal", "firmado"], text: "aprobación de estados financieros dividendos" },
   { date: "05/02/2026", title: "Factura 001-001-000055210", from: "Transportes Cotopaxi", type: "Factura", tags: ["logística"], text: "flete quito latacunga total 240.00" },
   { date: "30/01/2026", title: "Contrato de trabajo indefinido", from: "Talento humano", type: "Contrato", tags: ["nómina", "firmado"], text: "jornada completa remuneración periodo de prueba" },
-  { date: "22/01/2026", title: "Factura 002-001-000007741", from: "Papelería Central", type: "Factura", tags: ["oficina"], text: "resmas carpetas archivadores total 45.60" },
+  { date: "22/01/2026", title: "Póliza de vehículos de reparto", from: "Seguros Equinoccial", type: "Póliza", tags: ["legal", "vence 2027"], text: "cobertura todo riesgo flota cuatro camionetas deducible" },
   { date: "15/01/2026", title: "Contrato de mantenimiento de equipos", from: "Servitec", type: "Contrato", tags: ["legal", "vence 2026"], text: "mantenimiento preventivo trimestral impresoras" },
 ];
 
 const SUGGESTIONS = ["ferretería", "138.00", "vence", "iess"];
 
-const TYPES = ["Factura", "Contrato", "Rol de pagos", "Acta", "Retención"] as const;
+const TYPES = ["Factura", "Contrato", "Póliza", "Rol de pagos", "Acta", "Retención"] as const;
 
 function norm(s: string) {
   return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
@@ -86,7 +86,7 @@ export default function ArchiveSearch() {
                 type="search"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Palabra, monto, fecha o proveedor"
+                placeholder="Palabra, monto, fecha o nombre"
                 autoComplete="off"
                 spellCheck={false}
               />

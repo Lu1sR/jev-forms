@@ -15,84 +15,69 @@ import {
 } from "@/lib/site";
 import styles from "./page.module.css";
 
-const FORMULARIOS_POINTS = [
-  {
-    term: "Fotos y PDF",
-    text: "Una foto desde el celular, un escaneo o la factura electrónica en PDF. JPG, PNG, HEIC o PDF de hasta 15 MB.",
-  },
-  {
-    term: "Comprobantes ecuatorianos",
-    text: "Facturas, notas de venta y precuentas, con RUC, número de comprobante, IVA y servicio donde los haya.",
-  },
-  {
-    term: "Montos que cuadran",
-    text: "Comprueba que subtotal, IVA y servicio sumen el total, y que la clave de acceso coincida con el comprobante.",
-  },
-  {
-    term: "Cada valor con su origen",
-    text: "Cada dato señala la línea exacta del documento de donde salió, para revisarlo en un segundo.",
-  },
-  {
-    term: "Sus formularios, no los nuestros",
-    text: "Usted define los campos: registro de compras, reembolsos, sorteos, reclamos. Los datos salen en JSON por API para su sistema.",
-  },
+const ARCHIVO_POINTS = [
+  { term: "Lee cada página", text: "Escaneos y fotos pasan a texto: se busca dentro del documento." },
+  { term: "Se clasifica solo", text: "Tipo, remitente y etiquetas, aprendidos de lo que ya archivó." },
+  { term: "Entra sin subirlo", text: "Desde una casilla de correo o una carpeta compartida." },
+  { term: "Cada área ve lo suyo", text: "Permisos por grupo e historial de quién cambió qué." },
 ];
 
-const GESTOR_POINTS = [
-  { term: "Lee todo lo que archiva", text: "Escaneos y fotos se convierten en texto: se busca dentro de cada página, no solo por el nombre del archivo." },
-  { term: "Se clasifica solo", text: "Aprende de lo que usted ya archivó y asigna tipo de documento, proveedor y etiquetas a lo nuevo." },
-  { term: "Entra por correo o carpeta", text: "Lo que llega a una casilla de correo o a una carpeta compartida se archiva sin que nadie lo suba." },
-  { term: "Cada área ve lo suyo", text: "Permisos por usuario y grupo, reglas de trabajo automáticas e historial de quién cambió qué y cuándo." },
-  { term: "Guardado para durar", text: "Conserva el original y una copia en PDF/A, el formato pensado para archivo de largo plazo. Comparte con enlaces que vencen." },
-];
+const ENTRADAS = ["Correo", "Escáner", "Celular", "Carpeta compartida"];
 
-const AREAS = [
+const SALIDAS = ["Google Sheets", "Su ERP o sistema, por API", "Avisos por correo", "Datos en cada documento"];
+
+const FLUJOS = [
   {
-    area: "Contabilidad",
-    docs: "Facturas de proveedores, notas de venta, retenciones",
-    change: "Las compras se registran sin digitar, y cada comprobante queda a la mano cuando lo piden.",
+    when: "Llega una factura al correo",
+    does: "Lee RUC, fecha y montos, y cuadra la suma",
+    result: "Una fila nueva en la hoja de compras",
   },
   {
-    area: "Talento humano",
-    docs: "Contratos, roles de pagos, certificados, avisos",
-    change: "El expediente de cada persona está completo y en un solo lugar.",
+    when: "Se archiva un contrato o una póliza",
+    does: "Lee la fecha de vencimiento",
+    result: "Un aviso por correo 30 días antes",
   },
   {
-    area: "Gerencia y legal",
-    docs: "Contratos, actas, poderes, pólizas",
-    change: "La versión firmada aparece en segundos, con sus fechas de vencimiento a la vista.",
+    when: "Ingresa un documento de personal",
+    does: "Revisa qué falta en el expediente",
+    result: "La lista de pendientes para talento humano",
   },
   {
-    area: "Promociones y servicio al cliente",
-    docs: "Comprobantes que envían sus clientes",
-    change: "Sorteos, reembolsos y reclamos se validan leyendo el comprobante, no a mano.",
+    when: "Un cliente envía su comprobante",
+    does: "Valida el monto y la fecha",
+    result: "Aprobado o marcado para revisar",
+  },
+  {
+    when: "Se aprueba un documento",
+    does: "Toma los datos ya revisados",
+    result: "Un registro en su ERP, por API",
   },
 ];
 
 const FAQ = [
   {
+    q: "¿Qué documentos acepta?",
+    a: "Cualquiera: PDF, escaneos y fotos. Contratos, facturas, actas, expedientes. Todo se lee y se busca por su contenido.",
+  },
+  {
+    q: "¿A qué sistemas puede enviar los datos?",
+    a: "Google Sheets, correo y cualquier sistema que reciba datos por API o webhook. El flujo lo armamos con usted.",
+  },
+  {
     q: "¿Funciona con las facturas electrónicas del SRI?",
-    a: "Sí. Lee el PDF de la factura electrónica (el RIDE) y también fotos de comprobantes impresos. En las electrónicas, además, comprueba que la clave de acceso coincida con el RUC, el número y la fecha del documento.",
+    a: "Sí. Lee el RIDE en PDF y fotos de comprobantes impresos, y comprueba que la clave de acceso coincida con el documento.",
   },
   {
     q: "¿Mis documentos salen de mi empresa?",
-    a: "Usted elige. Gestor puede funcionar en nuestra nube o instalarse en un servidor de su empresa, para que los documentos no salgan de su red. Lo conversamos según lo que exija su política de datos y la Ley Orgánica de Protección de Datos Personales.",
+    a: "Usted elige: nuestra nube o un servidor de su empresa, según su política de datos y la Ley Orgánica de Protección de Datos Personales.",
   },
   {
-    q: "¿Puedo empezar con un producto y sumar el otro después?",
-    a: "Sí. Formularios y Gestor se contratan por separado. Si empieza con uno, sumar el otro no obliga a cambiar nada de lo que ya tiene.",
-  },
-  {
-    q: "¿Tengo que cambiar mi sistema contable?",
-    a: "No. Formularios entrega los datos en JSON por una API que su sistema puede recibir, y Gestor convive con sus carpetas y su correo actuales.",
-  },
-  {
-    q: "¿Qué pasa cuando el sistema no está seguro de un dato?",
-    a: "Lo dice. Cada campo sale como listo, para revisar o vacío si no aparece en el documento, en lugar de inventar un valor. Usted corrige lo marcado y sigue.",
+    q: "¿Qué pasa cuando no está seguro de un dato?",
+    a: "Lo dice. Cada campo sale como listo, para revisar o vacío. Nunca un valor inventado.",
   },
   {
     q: "¿Cuánto cuesta?",
-    a: "Depende de cuántos documentos procesa al mes, cuántas personas lo usan y dónde se instala. Llene la solicitud de arriba y le enviamos una propuesta.",
+    a: "Depende de su volumen, cuántas personas lo usan y dónde se instala. Llene la solicitud y le enviamos una propuesta.",
   },
 ];
 
@@ -114,8 +99,8 @@ export default function Home() {
             <Wordmark />
           </a>
           <nav className={styles.nav} aria-label="Secciones">
-            <a href="#formularios">Formularios</a>
             <a href="#gestor">Gestor</a>
+            <a href="#flujos">Flujos</a>
             <a href="#cotizar">Cotizar</a>
             <a href="#preguntas">Preguntas</a>
           </nav>
@@ -126,40 +111,37 @@ export default function Home() {
           <section className={styles.hero} aria-labelledby="hero-title">
             <div className={styles.heroText}>
               <h1 id="hero-title" className={styles.display}>
-                Deje de digitar.
-                <span> Empiece a encontrar.</span>
+                Sus documentos,
+                <span> trabajando solos.</span>
               </h1>
               <p className={styles.lede}>
-                docutecec lee las facturas y documentos de su empresa, llena los campos que usted necesita y
-                guarda cada archivo donde lo encuentra en segundos.
+                docutecec archiva y lee los documentos de su empresa, los encuentra en segundos y lleva sus datos a
+                donde los necesita.
               </p>
               <div className={styles.actions}>
                 <ContactButton label={HAS_WHATSAPP ? "Escríbanos por WhatsApp" : "Escríbanos"} />
-                <a className={styles.secondary} href={FORMULARIOS_URL}>
-                  Probar con un comprobante
+                <a className={styles.secondary} href={GESTOR_URL} target="_blank" rel="noopener">
+                  Entrar a la demo
                   <ArrowIcon className={styles.btnIcon} />
                 </a>
               </div>
 
               <ul className={styles.products}>
-                <li>
-                  <a href="#formularios" className={styles.product}>
-                    <span className={styles.productLetter}>A</span>
-                    <span>
-                      <b>Formularios</b>
-                      <span>Lee comprobantes y llena sus formularios</span>
-                    </span>
-                  </a>
-                </li>
-                <li>
-                  <a href="#gestor" className={styles.product}>
-                    <span className={styles.productLetter}>B</span>
-                    <span>
-                      <b>Gestor</b>
-                      <span>Archiva cada documento y lo encuentra al instante</span>
-                    </span>
-                  </a>
-                </li>
+                {[
+                  { letter: "A", name: "Archiva", note: "Correo, escáner o celular: todo en un solo lugar", href: "#gestor" },
+                  { letter: "B", name: "Encuentra", note: "Por una palabra, una fecha o un monto", href: "#gestor" },
+                  { letter: "C", name: "Automatiza", note: "Flujos que leen y envían los datos", href: "#flujos" },
+                ].map((c) => (
+                  <li key={c.letter}>
+                    <a href={c.href} className={styles.product}>
+                      <span className={styles.productLetter}>{c.letter}</span>
+                      <span>
+                        <b>{c.name}</b>
+                        <span>{c.note}</span>
+                      </span>
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -170,12 +152,12 @@ export default function Home() {
 
           <dl className={styles.strip}>
             <div>
-              <dt>Productos</dt>
-              <dd>Formularios · Gestor</dd>
+              <dt>Documentos</dt>
+              <dd>Todos los de su empresa</dd>
             </div>
             <div>
-              <dt>Contratación</dt>
-              <dd>Juntos o por separado</dd>
+              <dt>Destinos</dt>
+              <dd>Google Sheets, correo, API</dd>
             </div>
             <div>
               <dt>Instalación</dt>
@@ -187,67 +169,20 @@ export default function Home() {
             </div>
           </dl>
 
-          <section id="formularios" className={styles.section} aria-labelledby="formularios-title">
-            <h2 id="formularios-title" className={styles.band}>
-              <span className={styles.bandName}>Formularios</span>
-              <span className={styles.bandText}>El comprobante entra, los datos salen listos</span>
-            </h2>
-            <div className={styles.split}>
-              <div className={styles.intro}>
-                <p className={styles.statement}>
-                  Nadie más copia a mano un RUC de trece dígitos.
-                </p>
-                <p className={styles.body}>
-                  Suba una foto o un PDF y cada campo de su formulario se llena en segundos. Lo que el sistema
-                  verificó queda marcado como listo; lo dudoso, para revisar; lo que no está en el documento, vacío.
-                  Nunca un dato inventado.
-                </p>
-                <ul className={styles.legend} aria-label="Cómo se marca cada campo">
-                  <li className={styles.legendOk}>
-                    <CheckIcon className={styles.legendIcon} />
-                    Listo
-                  </li>
-                  <li className={styles.legendWarn}>
-                    <QueryIcon className={styles.legendIcon} />
-                    Revisar
-                  </li>
-                  <li className={styles.legendNone}>
-                    <DashIcon className={styles.legendIcon} />
-                    No aparece
-                  </li>
-                </ul>
-                <a className={styles.demoLink} href={FORMULARIOS_URL}>
-                  <span className={styles.demoLabel}>Demo abierta</span>
-                  <span className={styles.demoHost}>{hostOf(FORMULARIOS_URL)}</span>
-                  <ArrowIcon className={styles.btnIcon} />
-                </a>
-              </div>
-              <dl className={styles.points}>
-                {FORMULARIOS_POINTS.map((p) => (
-                  <div key={p.term}>
-                    <dt>{p.term}</dt>
-                    <dd>{p.text}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          </section>
-
           <section id="gestor" className={`${styles.section} ${styles.copy}`} aria-labelledby="gestor-title">
             <h2 id="gestor-title" className={styles.band}>
-              <span className={styles.bandName}>Gestor</span>
-              <span className={styles.bandText}>Todo el archivo de la empresa, en un solo lugar</span>
+              <span className={styles.bandName}>Gestor Documental</span>
+              <span className={styles.bandText}>Archive, busque y controle cada documento</span>
             </h2>
             <div className={`${styles.split} ${styles.splitReverse}`}>
               <div className={styles.intro}>
-                <p className={styles.statement}>La carpeta que alguien guardó “en algún lado” ya no existe.</p>
+                <p className={styles.statement}>Archiva, lee y encuentra cada documento en segundos.</p>
                 <p className={styles.body}>
-                  Gestor reúne facturas, contratos, actas y expedientes en un archivo que se busca como se busca en
-                  internet: por una palabra, un monto, una fecha o un proveedor. Pruebe el buscador con este archivo de
-                  ejemplo.
+                  Busque por una palabra, un monto, una fecha o un nombre, dentro del texto de cada página. Pruebe con
+                  este archivo de ejemplo.
                 </p>
                 <dl className={styles.points}>
-                  {GESTOR_POINTS.map((p) => (
+                  {ARCHIVO_POINTS.map((p) => (
                     <div key={p.term}>
                       <dt>{p.term}</dt>
                       <dd>{p.text}</dd>
@@ -257,11 +192,11 @@ export default function Home() {
                 <div className={styles.installs}>
                   <div>
                     <b>En la nube de docutecec</b>
-                    <span>Sin equipos que comprar ni servidores que mantener.</span>
+                    <span>Sin servidores que mantener.</span>
                   </div>
                   <div>
                     <b>En el servidor de su empresa</b>
-                    <span>Los documentos no salen de la red de su empresa.</span>
+                    <span>Los documentos no salen de su red.</span>
                   </div>
                 </div>
                 <div className={styles.demoAccess}>
@@ -271,7 +206,7 @@ export default function Home() {
                     <ArrowIcon className={styles.btnIcon} />
                   </a>
                   {GESTOR_DEMO_USER && GESTOR_DEMO_PASSWORD ? (
-                    <dl className={styles.demoLogin} aria-label="Acceso a la demo de Gestor">
+                    <dl className={styles.demoLogin} aria-label="Acceso a la demo">
                       <div>
                         <dt>Usuario</dt>
                         <dd>{GESTOR_DEMO_USER}</dd>
@@ -290,63 +225,97 @@ export default function Home() {
             </div>
           </section>
 
-          <section id="suite" className={styles.section} aria-labelledby="suite-title">
-            <h2 id="suite-title" className={styles.band}>
-              <span className={styles.bandName}>Suite</span>
-              <span className={styles.bandText}>Juntos o por separado</span>
+          <section id="flujos" className={styles.section} aria-labelledby="flujos-title">
+            <h2 id="flujos-title" className={styles.band}>
+              <span className={styles.bandName}>Flujos</span>
+              <span className={styles.bandText}>Un flujo para cada documento</span>
             </h2>
-            <div className={styles.suite}>
-              <p className={styles.statement}>
-                Cada uno resuelve un problema. Juntos cubren el camino completo del documento.
-              </p>
-              <ol className={styles.flow}>
-                <li>
-                  <span className={styles.flowStep}>1</span>
-                  <b>Llega el documento</b>
-                  <span>Por correo, desde el escáner o como foto tomada con el celular.</span>
-                </li>
-                <li>
-                  <span className={styles.flowStep}>2</span>
-                  <b>Formularios lo lee</b>
-                  <span>RUC, número, fecha y montos quedan en sus casilleros, verificados.</span>
-                </li>
-                <li>
-                  <span className={styles.flowStep}>3</span>
-                  <b>Gestor lo archiva</b>
-                  <span>Queda guardado, clasificado y listo para encontrarlo por cualquier palabra, fecha o monto.</span>
-                </li>
-              </ol>
-              <p className={styles.body}>
-                Puede empezar solo con Formularios para dejar de digitar, o solo con Gestor para ordenar el archivo, y
-                sumar el otro cuando lo necesite.
-              </p>
-            </div>
-          </section>
+            <div className={styles.flows}>
+              <div className={styles.flowsIntro}>
+                <p className={styles.statement}>El gestor es el centro de su operación documental.</p>
+                <p className={styles.body}>
+                  Cada tipo de documento puede tener su propio flujo: se activa cuando el documento entra, cambia o
+                  vence, y lleva sus datos a donde los necesita.
+                </p>
+              </div>
 
-          <section className={styles.section} aria-labelledby="areas-title">
-            <h2 id="areas-title" className={styles.band}>
-              <span className={styles.bandName}>Áreas</span>
-              <span className={styles.bandText}>Dónde se nota primero</span>
-            </h2>
-            <div className={styles.tableWrap}>
-              <table className={styles.areas}>
-                <thead>
-                  <tr>
-                    <th scope="col">Área</th>
-                    <th scope="col">Documentos</th>
-                    <th scope="col">Qué cambia</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {AREAS.map((a) => (
-                    <tr key={a.area}>
-                      <th scope="row">{a.area}</th>
-                      <td>{a.docs}</td>
-                      <td>{a.change}</td>
+              <div
+                className={styles.hub}
+                role="img"
+                aria-label="Los documentos entran al gestor por correo, escáner, celular o carpeta, y sus flujos envían los datos a Google Sheets, su ERP, avisos por correo o al mismo documento."
+              >
+                <div className={styles.hubSide}>
+                  <span className={styles.hubLabel}>Entra por</span>
+                  <ul>
+                    {ENTRADAS.map((e) => (
+                      <li key={e}>{e}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div className={styles.hubCore}>
+                  <Wordmark inverse />
+                  <b>Gestor documental</b>
+                  <span>Archiva · Lee · Ejecuta sus flujos</span>
+                </div>
+                <div className={`${styles.hubSide} ${styles.hubOut}`}>
+                  <span className={styles.hubLabel}>Sale hacia</span>
+                  <ul>
+                    {SALIDAS.map((e) => (
+                      <li key={e}>{e}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className={styles.flowTable}>
+                <h3 className={styles.subhead}>Algunos flujos que puede activar</h3>
+                <table className={styles.areas}>
+                  <thead>
+                    <tr>
+                      <th scope="col">Cuando</th>
+                      <th scope="col">El flujo</th>
+                      <th scope="col">Resultado</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {FLUJOS.map((f) => (
+                      <tr key={f.when}>
+                        <th scope="row">{f.when}</th>
+                        <td>{f.does}</td>
+                        <td>{f.result}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className={styles.extract}>
+                <div className={styles.extractText}>
+                  <h3 className={styles.subhead}>Extracción: usted define los campos</h3>
+                  <p className={styles.body}>
+                    Lo verificado queda listo; lo dudoso, para revisar; lo que no está, vacío.
+                  </p>
+                </div>
+                <ul className={styles.legend} aria-label="Cómo se marca cada campo">
+                  <li className={styles.legendOk}>
+                    <CheckIcon className={styles.legendIcon} />
+                    Listo
+                  </li>
+                  <li className={styles.legendWarn}>
+                    <QueryIcon className={styles.legendIcon} />
+                    Revisar
+                  </li>
+                  <li className={styles.legendNone}>
+                    <DashIcon className={styles.legendIcon} />
+                    No aparece
+                  </li>
+                </ul>
+                <a className={styles.demoLink} href={FORMULARIOS_URL}>
+                  <span className={styles.demoLabel}>Pruebe con un documento suyo</span>
+                  <span className={styles.demoHost}>{hostOf(FORMULARIOS_URL)}</span>
+                  <ArrowIcon className={styles.btnIcon} />
+                </a>
+              </div>
             </div>
           </section>
 
@@ -357,15 +326,15 @@ export default function Home() {
             </h2>
             <div className={styles.quote}>
               <div className={styles.intro}>
-                <p className={styles.statement}>Una propuesta a la medida de su volumen, no un plan de catálogo.</p>
+                <p className={styles.statement}>Una propuesta a su medida, no un plan de catálogo.</p>
                 <ol className={styles.steps}>
                   <li>
                     <b>Nos escribe</b>
-                    <span>Con esta solicitud llena, por WhatsApp o por correo.</span>
+                    <span>Con esta solicitud, por WhatsApp o correo.</span>
                   </li>
                   <li>
                     <b>Lo vemos con sus documentos</b>
-                    <span>Una demostración con comprobantes y archivos reales de su empresa.</span>
+                    <span>Una demostración con documentos reales de su empresa.</span>
                   </li>
                   <li>
                     <b>Recibe la propuesta</b>
@@ -394,7 +363,7 @@ export default function Home() {
 
           <section className={styles.close} aria-labelledby="close-title">
             <h2 id="close-title" className={styles.closeTitle}>
-              Traiga un comprobante suyo. Se lo leemos en vivo.
+              Traiga un documento suyo. Lo vemos trabajar en vivo.
             </h2>
             <div className={styles.closeActions}>
               <ContactButton label={HAS_WHATSAPP ? "Escríbanos por WhatsApp" : "Escríbanos"} />
@@ -412,19 +381,19 @@ export default function Home() {
         <footer className={styles.footer}>
           <div className={styles.footBrand}>
             <Wordmark inverse />
-            <p>Lectura de comprobantes y gestión documental para empresas del Ecuador.</p>
+            <p>Gestión documental con flujos automáticos para empresas del Ecuador.</p>
           </div>
           <nav className={styles.footCols} aria-label="Enlaces">
             <div>
-              <h3>Productos</h3>
-              <a href="#formularios">Formularios</a>
-              <a href="#gestor">Gestor</a>
-              <a href="#suite">Suite completa</a>
+              <h3>docutecec</h3>
+              <a href="#gestor">Gestor documental</a>
+              <a href="#flujos">Flujos</a>
+              <a href="#cotizar">Cotizar</a>
             </div>
             <div>
               <h3>Demos</h3>
-              <a href={FORMULARIOS_URL}>{hostOf(FORMULARIOS_URL)}</a>
               <a href={GESTOR_URL}>{hostOf(GESTOR_URL)}</a>
+              <a href={FORMULARIOS_URL}>{hostOf(FORMULARIOS_URL)}</a>
             </div>
             <div>
               <h3>Contacto</h3>

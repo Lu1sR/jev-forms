@@ -57,9 +57,10 @@ access key.
 ## Brand Commitments
 
 Brand: **docutecec** (docutecec.com), B2B for Ecuadorian companies, serious tone, Spanish
-"usted". This product is sold as **Formularios** (demo at formularios.docutecec.com)
-alongside **Gestor**, a paperless-ngx based document manager (gestor.docutecec.com),
-separately or together; Gestor runs in docutecec's cloud or on the client's server.
+"usted". docutecec sells one product, a document manager (paperless-ngx based, never
+named publicly; demo at gestor.docutecec.com) with a flow engine. This extraction demo
+(formularios.docutecec.com) is presented as one step of a flow, not a separate product.
+It runs in docutecec's cloud or on the client's server.
 Quote only, no public prices. The landing lives in `landing/` (landing/DESIGN.md); the demo in
 `web/` follows DESIGN.md, which now uses the same docutecec palette and type.
 
