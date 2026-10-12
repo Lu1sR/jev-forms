@@ -79,3 +79,5 @@ Constraints for each level:
 - MUST still execute the user's choice if they disagree with a suggestion
 
 <!-- END AWS Agent Toolkit rules -->
+
+Contexto del repositorio: leer primero `.context/index.md` (arquitectura, convenciones y decisiones en `.context/`).

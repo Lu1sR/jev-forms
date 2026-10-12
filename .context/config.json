@@ -1,0 +1,21 @@
+{
+  "watch": [
+    "engine/**",
+    "web/**",
+    "landing/**",
+    "gestor/**",
+    "infra/**",
+    "docs/**",
+    "*.md"
+  ],
+  "ignore": [
+    "engine/samples/**",
+    "web/public/samples/**",
+    "infra/cdk.out/**",
+    "infra/cdk.context.json",
+    "**/.next/**",
+    "**/.wrangler/**",
+    ".impeccable/**",
+    "landing/.impeccable/**"
+  ]
+}
