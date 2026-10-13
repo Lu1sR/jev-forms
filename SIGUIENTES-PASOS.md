@@ -10,9 +10,8 @@ Gestor de producción en AWS (plantilla por cliente), primera instancia docs.lui
       botones "Escríbanos" y "Cotizar" de la landing mandan correos que rebotan. Crear el
       buzón (DonDominio "Hosting y Correo", Google Workspace o Zoho) y cargar sus
       registros DNS.
-- [ ] **WhatsApp Business.** Poner el número en `NEXT_PUBLIC_WHATSAPP_NUMBER` del
-      servicio `landing` en Railway (dígitos con código de país, 5939XXXXXXXX). Con
-      número, los botones abren WhatsApp con un mensaje ya escrito.
+- [x] **WhatsApp Business.** `NEXT_PUBLIC_WHATSAPP_NUMBER=593979241562` en el servicio
+      `landing` de Railway (2026-10-13); los botones abren WhatsApp con el mensaje escrito.
 
 ## 2. Gestor: de demo a producto
 
