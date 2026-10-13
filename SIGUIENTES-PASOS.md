@@ -6,10 +6,10 @@ Gestor de producción en AWS (plantilla por cliente), primera instancia docs.lui
 
 ## 1. Urgente: que los contactos lleguen
 
-- [ ] **Correo `contacto@docutecec.com`.** El dominio no tiene registros MX, así que los
-      botones "Escríbanos" y "Cotizar" de la landing mandan correos que rebotan. Crear el
-      buzón (DonDominio "Hosting y Correo", Google Workspace o Zoho) y cargar sus
-      registros DNS.
+- [x] **Correo `contacto@docutecec.com`.** Buzón en DonDominio (Hosting y Correo, plan
+      Mini), MX `mx01.dondominio.com`, SPF y DMARC `p=none` (2026-10-13).
+      Pendiente: activar DKIM, cerrar el SPF con `~all` y pasar DMARC a `p=quarantine`
+      cuando el envío esté estable.
 - [x] **WhatsApp Business.** `NEXT_PUBLIC_WHATSAPP_NUMBER=593979241562` en el servicio
       `landing` de Railway (2026-10-13); los botones abren WhatsApp con el mensaje escrito.
 
