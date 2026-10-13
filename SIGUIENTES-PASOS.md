@@ -8,8 +8,9 @@ Gestor de producción en AWS (plantilla por cliente), primera instancia docs.lui
 
 - [x] **Correo `contacto@docutecec.com`.** Buzón en DonDominio (Hosting y Correo, plan
       Mini), MX `mx01.dondominio.com`, SPF y DMARC `p=none` (2026-10-13).
-      Pendiente: activar DKIM, cerrar el SPF con `~all` y pasar DMARC a `p=quarantine`
-      cuando el envío esté estable.
+      Prueba a Gmail con SPF, DKIM (firma de DonDominio, `d=docutecec.com`) y DMARC en PASS.
+      Pendiente: cerrar el SPF con `~all` y pasar DMARC a `p=quarantine` cuando el envío
+      esté estable.
 - [x] **WhatsApp Business.** `NEXT_PUBLIC_WHATSAPP_NUMBER=593979241562` en el servicio
       `landing` de Railway (2026-10-13); los botones abren WhatsApp con el mensaje escrito.
 
