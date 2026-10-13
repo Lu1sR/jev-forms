@@ -119,9 +119,10 @@ duplica. Las credenciales nunca van al repo; solo la plantilla.
 ## Límites y cuidados
 
 - **Licencia de n8n** (Sustainable Use License): permitido como herramienta interna detrás
-  de tu producto donde los clientes reciben resultados, no acceso al editor. Confirmar con
-  license@n8n.io antes de cobrar por instancias en tu nube. No dar nunca acceso al editor a
-  un cliente.
+  de tu producto donde los clientes reciben resultados, no acceso al editor; también
+  cobrando una mensualidad por instancias en nuestra nube (FAQ revisado el 2026-10-13,
+  ADR-007). No dar nunca acceso al editor a un cliente. Consultar a license@n8n.io antes de
+  instalar n8n en el servidor de un cliente como parte de un producto pagado.
 - **Memoria**: n8n necesita ~400 MB; la VM debe ser de 4 GB (`t4g.medium`).
 - Webhooks de Paperless: no se reintentan si n8n está caído; por eso existe
   `sheets/reconcile`. `PAPERLESS_WEBHOOKS_ALLOW_INTERNAL_REQUESTS=true` es necesario

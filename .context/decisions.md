@@ -146,3 +146,41 @@ remitentes autorizados. Solo se rechaza si `FALLBACK_EMAIL` no está configurado
 respaldo, y cada remitente nuevo hay que autorizarlo a mano para que entre a Gestor.
 
 ---
+
+## ADR-007 — El modelo de flujos con n8n no necesita licencia comercial mientras el cliente no toque n8n
+
+**Date:** 2026-10-13
+**Status:** Accepted
+**Affects:** `gestor/deploy/flows/`, `docs/workflows-exploration.md`, `SIGUIENTES-PASOS.md`, ADR-002
+
+**Context.** ADR-002 dejó pendiente escribir a license@n8n.io antes del primer cliente de
+pago, porque operar n8n en nuestra nube y cobrar una mensualidad parecía zona gris de la
+Sustainable Use License.
+
+**Decision.** No se pide licencia ni confirmación para el modelo actual. El FAQ oficial
+(docs.n8n.io, License FAQ, leído el 2026-10-13) permite construir y mantener flujos para
+clientes en nuestras instancias, cobrar por ello y usar n8n por detrás del producto, aunque
+el cliente conecte sus propias cuentas, siempre que el cliente no pueda crear ni editar la
+lógica de los flujos. Lo que decide es el acceso del cliente, no quién hospeda, cuántos
+clientes hay ni cuánto se factura. Ningún cliente recibe acceso al editor de n8n, ni
+siquiera si lo pide.
+
+**Alternatives considered.**
+- Escribir a license@n8n.io de todos modos: innecesario mientras el FAQ cubra el caso.
+- Dar acceso al panel de n8n al cliente que lo pida: rechazado; la edición comunitaria no
+  tiene un rol de solo lectura, así que sería alojar n8n y dejar que el cliente construya
+  flujos, lo que la licencia prohíbe sin licencia Enterprise.
+
+**Consequences.** El primer cliente de pago no depende de n8n. Hay que consultar a
+license@n8n.io antes de: instalar Gestor + n8n en el servidor del cliente como producto
+pagado (zona gris según el FAQ), dejar que el cliente configure flujos por cualquier vía
+(interfaz propia, API, MCP o un agente) en nuestra nube. En la modalidad "en la cuenta AWS
+del cliente" el cliente es el dueño de su n8n y puede entrar al panel y crear sus propios
+flujos (uso interno suyo); nosotros cobramos instalación, flujos y administración, nunca
+por n8n ni por una licencia que lo incluya, y la cuenta y su factura de AWS son del
+cliente (si no, sería hospedaje nuestro). El FAQ llama zona gris a entregar n8n dentro de
+un producto pagado en la infraestructura del cliente: confirmar esta modalidad con
+license@n8n.io antes del primer cliente que la contrate. El FAQ puede cambiar: revisarlo
+antes de cada cambio de modelo.
+
+---

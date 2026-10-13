@@ -46,8 +46,10 @@ Pendiente en AWS:
       público; cuenta de servicio de Google y hoja con cabeceras; `put-secrets.sh familia`;
       `cdk deploy` (pasa a `t4g.medium`); `paperless_setup.py sheets`; token a SSM;
       `gestor-up`. Diseño en `docs/workflows-exploration.md`.
-- [ ] Licencia de n8n: escribir a license@n8n.io describiendo el modelo antes del primer
-      cliente de pago.
+- [x] Licencia de n8n: el modelo actual (nuestra nube, solo nosotros editamos flujos, el
+      cliente nunca entra a n8n) está permitido según el FAQ oficial (2026-10-13, ADR-007).
+      Consultar a license@n8n.io solo antes de instalar en el servidor de un cliente o de
+      dejar que un cliente configure flujos.
 
 ## 3. Formularios: pulir
 

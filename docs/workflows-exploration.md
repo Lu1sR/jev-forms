@@ -243,7 +243,8 @@ reinventar la rueda y cada conector costaría semanas.
 
 Lo que n8n **no** resuelve y hay que diseñar alrededor (detalle en la sección 6):
 
-1. La **licencia** no es libre para operarlo como parte de un servicio cobrado.
+1. La **licencia** permite operarlo para clientes solo si ellos nunca crean ni editan
+   flujos (sección 6).
 2. No tiene **usuarios finales ni roles**: quien tiene un enlace, actúa.
 3. Su registro de ejecuciones es técnico y se poda; **no es una auditoría de negocio**.
 4. **Memoria**: no cabe cómodo en la VM de 2 GB.
@@ -452,7 +453,7 @@ identidad y luego llama a la URL de reanudación con un Header Auth interno.
 
 | Falta | Cómo se cubre | Costo |
 |---|---|---|
-| **Licencia.** Texto de la SUL (LICENSE.md): uso "solo para fines internos del negocio o uso personal o no comercial"; distribución "solo gratis y con fines no comerciales". FAQ oficial (docs.n8n.io, License FAQ, leído el 2026-10-07): fin interno es usar n8n "dentro de tu organización o producto, donde personas externas pueden recibir o ver lo que tus flujos producen"; "los servicios de consultoría y automatización están explícitamente permitidos" si "n8n sigue siendo tu herramienta interna, donde los clientes reciben resultados, no acceso"; está permitido "usar n8n tras bambalinas en tu propio producto, donde los usuarios usan y disparan las automatizaciones que tú construiste, e incluso conectan sus propias cuentas"; si el cliente corre n8n en su infraestructura, puedes cobrarle por instalar, configurar, construir flujos y mantener. **Prohibido:** "hospedar n8n como servicio y permitir que tus clientes construyan flujos", white-label cobrando acceso, y dejar que usuarios externos construyan o configuren sus propios flujos (por interfaz propia, API, MCP o un agente), que exige licencia Enterprise/Embed. **Lectura para Gestor:** el modelo "n8n por instancia, solo yo edito, el cliente solo dispara y aprueba, el valor del producto está en Gestor y Formularios" encaja en lo permitido; la zona gris es que la instancia esté en mi nube y se cobre mensualidad. Acción: escribir a license@n8n.io describiendo exactamente ese modelo y guardar la respuesta; nunca dar acceso al editor a un cliente; si un cliente quiere construir sus propios flujos, instancia propia a su nombre. Alternativas con licencia permisiva si la respuesta es negativa: Activepieces (núcleo MIT), Windmill (AGPL), Node-RED (Apache 2.0) **[Verificar licencias actuales]**. **Esto no es asesoría legal.** El piloto familiar es uso personal | Decisión de negocio, no de código |
+| **Licencia.** Texto de la SUL (LICENSE.md): uso "solo para fines internos del negocio o uso personal o no comercial"; distribución "solo gratis y con fines no comerciales". FAQ oficial (docs.n8n.io, License FAQ, leído el 2026-10-07): fin interno es usar n8n "dentro de tu organización o producto, donde personas externas pueden recibir o ver lo que tus flujos producen"; "los servicios de consultoría y automatización están explícitamente permitidos" si "n8n sigue siendo tu herramienta interna, donde los clientes reciben resultados, no acceso"; está permitido "usar n8n tras bambalinas en tu propio producto, donde los usuarios usan y disparan las automatizaciones que tú construiste, e incluso conectan sus propias cuentas"; si el cliente corre n8n en su infraestructura, puedes cobrarle por instalar, configurar, construir flujos y mantener. **Prohibido:** "hospedar n8n como servicio y permitir que tus clientes construyan flujos", white-label cobrando acceso, y dejar que usuarios externos construyan o configuren sus propios flujos (por interfaz propia, API, MCP o un agente), que exige licencia Enterprise/Embed. **Lectura para Gestor:** el modelo "n8n por instancia, solo yo edito, el cliente solo dispara y aprueba, el valor del producto está en Gestor y Formularios" encaja en lo permitido; la zona gris es que la instancia esté en mi nube y se cobre mensualidad. Acción: escribir a license@n8n.io describiendo exactamente ese modelo y guardar la respuesta; nunca dar acceso al editor a un cliente; si un cliente quiere construir sus propios flujos, instancia propia a su nombre. Alternativas con licencia permisiva si la respuesta es negativa: Activepieces (núcleo MIT), Windmill (AGPL), Node-RED (Apache 2.0) **[Verificar licencias actuales]**. **Actualización 2026-10-13:** el FAQ actual responde de forma explícita que se puede usar n8n para entregar automatizaciones a varios clientes como servicio gestionado, sin límite de clientes ni de ingresos, siempre que los clientes no accedan a la instancia; lo que decide es el acceso del cliente, no quién hospeda ni quién paga. Ya no hace falta escribir a license@n8n.io para el modelo actual (instancia en nuestra nube, solo nosotros editamos). Sí hay que escribir antes de: instalar Gestor + n8n en el servidor del cliente como producto pagado (el FAQ lo llama zona gris), o permitir que el cliente configure la lógica de un flujo. Decisión en ADR-007. **Esto no es asesoría legal.** El piloto familiar es uso personal | Decisión de negocio, no de código |
 | **Usuarios y roles de negocio** | Paperless tiene los usuarios, grupos y permisos por documento; Cloudflare Access da la identidad en los formularios; la lista de aprobadores por flujo vive en una tabla pequeña (Postgres, nodo Data Table de n8n o una hoja) que el flujo consulta | Bajo |
 | **Auditoría de negocio** | Cada paso relevante escribe una **nota** en el documento ("Aprobado por X el …", "Enviado a Sheets, fila 123") y actualiza campos; el historial de Paperless registra quién y cuándo. Para consultas agregadas, una tabla `eventos` en la base `n8n` (nodo Postgres) o una hoja de auditoría. Las ejecuciones de n8n se conservan 30 días para depurar | Bajo |
 | **Bandeja "mis pendientes"** | Vistas guardadas de Paperless por estado, compartidas con el grupo correspondiente, con el campo URL "Aprobar" visible en la lista | Cero |
@@ -467,7 +468,7 @@ identidad y luego llama a la URL de reanudación con un Header Auth interno.
 
 | Tema | Riesgo | Mitigación |
 |---|---|---|
-| Licencia de n8n | Modelo "yo hospedo y cobro" fuera de lo permitido | Resolver antes del primer cliente de pago (sección 6); el piloto no lo necesita |
+| Licencia de n8n | Que un cliente llegue a crear o editar flujos, o instalar n8n en su servidor como producto pagado | Nunca dar acceso al editor; consultar a license@n8n.io antes de una instalación en el servidor del cliente (sección 6, ADR-007) |
 | Memoria | n8n + Paperless en 2 GB | `t4g.medium`; medir en reposo y en pico de OCR |
 | Pérdida de webhooks | Paperless no reintenta ante conexión fallida; un solo worker de Celery | Reconciliación periódica desde n8n; alarma si encuentra atrasados |
 | Bucles webhook ↔ escrituras | Ejecuciones en cadena | Etiquetas de entrada/salida en el filtro nativo; comprobación inicial; `bulk_edit` |
@@ -480,8 +481,8 @@ identidad y luego llama a la URL de reanudación con un Header Auth interno.
 
 Preguntas abiertas:
 
-1. ¿Dónde vivirá la instancia del cliente de pago: tu AWS o la del cliente? Define la
-   respuesta de licencia.
+1. ¿Dónde vivirá la instancia del cliente de pago: tu AWS o la del cliente? En nuestra
+   nube está permitido; en el servidor del cliente hay que consultar a n8n.
 2. ¿Qué flujos tienen demanda real? Los dos ejemplos son hipótesis hasta hablar con
    los pilotos.
 3. ¿Formularios como servicio compartido (Railway) o como contenedor en la VM del
@@ -501,11 +502,11 @@ Preguntas abiertas:
    despliegue de flujos y credenciales desde el repo y SSM.
 4. **Aprobaciones** con el nodo Wait y formularios de n8n detrás de Cloudflare
    Access, enlazados desde un campo URL en el documento.
-5. **Resolver la licencia antes del primer cliente de pago.** Mientras tanto, el
-   piloto familiar es uso personal.
+5. **Licencia:** el modelo actual está permitido (ADR-007). Consultar a n8n solo antes
+   de instalar en el servidor de un cliente o de dejar que un cliente configure flujos.
 
 El diseño del sidecar Django queda como plan de contingencia si la licencia de n8n
-resulta inviable y las alternativas con licencia permisiva no convencen: sus
+resulta inviable para un modelo futuro y las alternativas con licencia permisiva no convencen: sus
 hallazgos sobre la API (sección 2) y la detección de cambios (4.2) aplican igual.
 
 ## 9. Estado de la implementación (2026-10-07)
@@ -561,6 +562,6 @@ Todo probable en local con `gestor/deploy` antes de tocar la instancia familiar.
    de Access, `pg_dump` de `n8n` en `backup.sh`, clave de cifrado y contraseñas en
    SSM, `t4g.medium`. Un flujo real: facturas de la familia → campos llenos → hoja
    de gastos.
-8. **Licencia y pilotos:** cotización de n8n Embed o decisión de desplegar en la
-   nube del cliente; dos pilotos con un flujo cada uno. Solo entonces invertir en más
+8. **Pilotos:** dos pilotos con un flujo cada uno, en nuestra nube (licencia
+   resuelta en ADR-007). Solo entonces invertir en más
    flujos.
