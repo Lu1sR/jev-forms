@@ -6,13 +6,13 @@ Gestor de producción en AWS (plantilla por cliente), primera instancia docs.lui
 
 ## 1. Urgente: que los contactos lleguen
 
-- [ ] **Correo `contacto@docutecec.com`.** El dominio no tiene registros MX, así que los
-      botones "Escríbanos" y "Cotizar" de la landing mandan correos que rebotan. Crear el
-      buzón (DonDominio "Hosting y Correo", Google Workspace o Zoho) y cargar sus
-      registros DNS.
-- [ ] **WhatsApp Business.** Poner el número en `NEXT_PUBLIC_WHATSAPP_NUMBER` del
-      servicio `landing` en Railway (dígitos con código de país, 5939XXXXXXXX). Con
-      número, los botones abren WhatsApp con un mensaje ya escrito.
+- [x] **Correo `contacto@docutecec.com`.** Buzón en DonDominio (Hosting y Correo, plan
+      Mini), MX `mx01.dondominio.com`, SPF y DMARC `p=none` (2026-10-13).
+      Prueba a Gmail con SPF, DKIM (firma de DonDominio, `d=docutecec.com`) y DMARC en PASS.
+      SPF cerrado con `~all`. Pendiente: pasar DMARC a `p=quarantine` cuando los informes
+      no muestren fallos.
+- [x] **WhatsApp Business.** `NEXT_PUBLIC_WHATSAPP_NUMBER=593979241562` en el servicio
+      `landing` de Railway (2026-10-13); los botones abren WhatsApp con el mensaje escrito.
 
 ## 2. Gestor: de demo a producto
 
@@ -46,8 +46,10 @@ Pendiente en AWS:
       público; cuenta de servicio de Google y hoja con cabeceras; `put-secrets.sh familia`;
       `cdk deploy` (pasa a `t4g.medium`); `paperless_setup.py sheets`; token a SSM;
       `gestor-up`. Diseño en `docs/workflows-exploration.md`.
-- [ ] Licencia de n8n: escribir a license@n8n.io describiendo el modelo antes del primer
-      cliente de pago.
+- [x] Licencia de n8n: el modelo actual (nuestra nube, solo nosotros editamos flujos, el
+      cliente nunca entra a n8n) está permitido según el FAQ oficial (2026-10-13, ADR-007).
+      Consultar a license@n8n.io solo antes de instalar en el servidor de un cliente o de
+      dejar que un cliente configure flujos.
 
 ## 3. Formularios: pulir
 
