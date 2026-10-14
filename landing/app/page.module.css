@@ -360,13 +360,14 @@
 
 .demoLink {
   display: inline-grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: minmax(0, auto) auto;
   grid-template-areas:
     "label icon"
     "host icon";
   column-gap: 1.5rem;
   align-items: center;
   justify-self: start;
+  max-width: 100%;
   padding: 0.625rem 1rem 0.6875rem;
   border: 1.5px solid var(--spot);
   background: #fff;
@@ -395,6 +396,7 @@
   font-family: var(--font-figure);
   font-size: 1.0625rem;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .demoLink .btnIcon {
