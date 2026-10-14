@@ -1,3 +1,4 @@
+import Link from "next/link";
 import ArchiveSearch from "@/components/ArchiveSearch";
 import HeroForm from "@/components/HeroForm";
 import { ArrowIcon, CheckIcon, DashIcon, MailIcon, QueryIcon, WhatsAppIcon } from "@/components/Icons";
@@ -403,7 +404,11 @@ export default function Home() {
               <a href={`mailto:${SALES_EMAIL}`}>{SALES_EMAIL}</a>
             </div>
           </nav>
-          <p className={styles.legal}>© {new Date().getFullYear()} docutecec · docutecec.com</p>
+          <p className={styles.legal}>
+            <span>© {new Date().getFullYear()} docutecec · docutecec.com</span>
+            <Link href="/terminos">Términos de uso</Link>
+            <Link href="/privacidad">Política de privacidad</Link>
+          </p>
         </footer>
       </div>
     </div>

@@ -263,6 +263,15 @@
   padding-top: 0.5rem;
 }
 
+.privacy {
+  color: var(--ink-3);
+  font-size: var(--step--1);
+}
+
+.privacy a {
+  color: inherit;
+}
+
 .samplesLabel {
   font-size: var(--step--1);
   color: var(--ink-2);
