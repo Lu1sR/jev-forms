@@ -462,6 +462,16 @@ export function Demo() {
                     ))}
                   </ul>
                 </div>
+                <p className={s.privacy}>
+                  El archivo se lee y se descarta; no lo guardamos.{" "}
+                  <a href="https://docutecec.com/privacidad" target="_blank" rel="noopener noreferrer">
+                    Política de privacidad
+                  </a>{" "}
+                  ·{" "}
+                  <a href="https://docutecec.com/terminos" target="_blank" rel="noopener noreferrer">
+                    Términos
+                  </a>
+                </p>
               </div>
             </div>
           ) : (
