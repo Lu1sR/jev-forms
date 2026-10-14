@@ -1,8 +1,9 @@
 # Siguientes pasos para lanzar docutecec
 
-Estado al 2026-10-04: landing en www.docutecec.com, Formularios en
-formularios.docutecec.com y demo de Gestor en gestor.docutecec.com, todo en Railway.
-Gestor de producción en AWS (plantilla por cliente), primera instancia docs.luis-dev.com.
+Estado al 2026-10-14: landing en www.docutecec.com, Formularios en
+formularios.docutecec.com, demo de Gestor en gestor.docutecec.com y motor público en
+formularios-api.docutecec.com, todo en Railway. Gestor de producción en AWS (plantilla por
+cliente), primera instancia docs.luis-dev.com con facturas por correo y flujos n8n.
 
 ## 1. Urgente: que los contactos lleguen
 
@@ -39,13 +40,16 @@ Pendiente en AWS:
       tratamiento (LOPDP; datos en us-east-2, Ohio) y limitar la política de ejecución de
       CloudFormation del bootstrap de CDK (hoy `AdministratorAccess`).
 - [ ] DMARC de `luis-dev.com` a `p=quarantine` cuando el envío esté estable (hoy `p=none`).
-- [ ] Facturas por correo con Cloudflare Email Worker (`infra/email-worker/`): desplegar y probar.
-- [ ] **Automatizaciones (n8n, `gestor/deploy/flows/`)**: construido y probado en local el
-      2026-10-07 (factura → Formularios → campos en Gestor; Sheets pendiente de credenciales).
-      Para la instancia familiar: exponer el motor en Railway con `ENGINE_API_KEYS` y dominio
-      público; cuenta de servicio de Google y hoja con cabeceras; `put-secrets.sh familia`;
-      `cdk deploy` (pasa a `t4g.medium`); `paperless_setup.py sheets`; token a SSM;
-      `gestor-up`. Diseño en `docs/workflows-exploration.md`.
+- [x] Facturas por correo con Cloudflare Email Worker (`infra/email-worker/`):
+      `facturas@` y `fact@luis-dev.com` entran a Gestor; todo lo que no entra se reenvía a
+      `FALLBACK_EMAIL` (ADR-006).
+- [x] **Automatizaciones (n8n, `gestor/deploy/flows/`)**: en producción desde el
+      2026-10-08. Factura → Formularios → campos en Gestor → fila en Google Sheets, con dos
+      hojas (`sheets`, `sheets-luis`). Diseño en `docs/workflows-exploration.md`.
+- [ ] Vigilar la memoria de la VM: sigue en `t4g.small` (2 GB) con Tika, Gotenberg y n8n
+      porque el plan gratuito no permite `t4g.medium`. Si saltan las alarmas, plan de pago.
+- [ ] Segundo flujo: aprobación (bandeja de revisión) con vistas "Por aprobar" en Gestor
+      (`docs/workflows-exploration.md`, 5.4).
 - [x] Licencia de n8n: el modelo actual (nuestra nube, solo nosotros editamos flujos, el
       cliente nunca entra a n8n) está permitido según el FAQ oficial (2026-10-13, ADR-007).
       Consultar a license@n8n.io solo antes de instalar en el servidor de un cliente o de
@@ -72,9 +76,10 @@ Tres niveles de oferta:
    Los verdes pasan directo. Es lo que se muestra en la demo y lo que el cliente paga.
 
 Para tener la API como producto:
-- [ ] Exponer el motor públicamente (hoy solo es accesible por la red privada de
-      Railway) con claves de API por cliente.
-- [ ] Medición de uso por cliente (documentos procesados) para cobrar.
+- [x] Exponer el motor públicamente con claves de API por cliente
+      (`formularios-api.docutecec.com`, `ENGINE_API_KEYS`).
+- [ ] Medición de uso por cliente para cobrar. Hoy solo hay una línea de log por
+      extracción (`jev.usage`); falta guardarla y sumarla por mes.
 - [ ] Límites de solicitudes y retención mínima de documentos (protección de datos).
 - [ ] Documentación de la API en español, enlazada desde la landing.
 - [ ] Validación contra el XML del SRI usando la clave de acceso.
@@ -117,14 +122,16 @@ Investigación de portales en Ecuador (2026-10-02):
 
 - [ ] Precios internos: Formularios (por documento o mensual), Gestor (nube o servidor
       del cliente). No se publican; sirven para cotizar.
-- [ ] Términos de uso y política de privacidad (Ley Orgánica de Protección de Datos
-      Personales, Ecuador 2021): se reciben comprobantes con datos personales.
+- [x] Términos de uso y política de privacidad de la landing y las demos públicas
+      (LOPDP, Ecuador 2021) en `docutecec.com/terminos` y `/privacidad`. Borrador propio:
+      revisarlo con un abogado antes del primer cliente de pago.
+- [ ] Contrato de servicio y de encargo de tratamiento para clientes de pago (Gestor y
+      flujos); los términos públicos no los cubren.
 - [ ] 2-3 empresas piloto: un mes gratis a cambio de opinión y testimonio.
 
 ## 5. Técnico menor
 
-- [ ] Pasar el DNS a Cloudflare para que `https://docutecec.com` (sin www) funcione.
-      Hoy solo `http://` redirige a www.
+- [x] `https://docutecec.com` (sin www) funciona desde DonDominio (comprobado el 2026-10-13).
 - [ ] Watch paths en Railway para `web`, `engine` y `gestor` (hoy cada push a `main`
       reconstruye todo).
 - [ ] Google Search Console para docutecec.com.
